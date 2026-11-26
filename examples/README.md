@@ -7,7 +7,7 @@
 | `reference.jpg`, `prompt.txt` | Common I2V input |
 | `straight.json`, `left.json`, `right.json`, `stationary.json` | Four 121-frame camera paths for the controlled UCPE comparison |
 | `rollout.json` | 145 camera poses for a multi-chunk AR replay |
-| `f2lf/` | F2LF quickstart inputs and a four-path showcase with its own calibrated references and captions |
+| `f2lf/` | F2LF quickstart inputs and a three-path showcase with its own calibrated references and captions |
 | `base-av/` | Animated Base AV clips, conditioning frames and exact prompts |
 | `accidents/` | PAI-Bench-G collision clips, conditioning frames and exact prompts |
 | `ucpe/` | Four animated UCPE clips |

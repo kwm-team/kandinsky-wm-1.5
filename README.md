@@ -71,15 +71,11 @@ Four continuations share a reference frame, prompt and seed. [Shared reference f
 
 ### F2LF endpoint control
 
-Four camera paths share the same endpoints, captions and seed. The controls move the midpoint while keeping both ends of the path fixed. [Inputs and reproduction command](examples/f2lf/directions/README.md)
+Three camera paths share the same endpoints, captions and seed. The left and right arcs shift the midpoint by 3.5 m. [Inputs and reproduction command](examples/f2lf/directions/README.md)
 
-| Straight path | 3.5 m left arc |
-| --- | --- |
-| [![F2LF straight path](examples/f2lf/directions/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/straight.mp4) | [![F2LF 3.5 metre left arc](examples/f2lf/directions/left-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/left-3.5m.mp4) |
-
-| 3.5 m right arc | 5 m right arc |
-| --- | --- |
-| [![F2LF 3.5 metre right arc](examples/f2lf/directions/right-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-3.5m.mp4) | [![F2LF 5 metre right arc](examples/f2lf/directions/right-5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-5m.mp4) |
+| Straight path | Left arc | Right arc |
+| --- | --- | --- |
+| [![F2LF straight path](examples/f2lf/directions/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/straight.mp4) | [![F2LF 3.5 metre left arc](examples/f2lf/directions/left-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/left-3.5m.mp4) | [![F2LF 3.5 metre right arc](examples/f2lf/directions/right-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-3.5m.mp4) |
 
 ## PAI-Bench-G results
 

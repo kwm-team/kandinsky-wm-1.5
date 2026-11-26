@@ -1,17 +1,16 @@
-# Four F2LF camera paths
+# Three F2LF camera paths
 
-The four five-second clips share a start image, an end image, camera calibration, captions and seed. The straight path is the reference. The other paths move the midpoint 3.5 m left, 3.5 m right or 5 m right, while keeping both endpoints fixed. [First frame](first.png) · [Last frame](last.png) · [Metric camera geometry](camera.json) · [Prompt](prompt.txt) · [Scene caption](scene.txt)
+The three five-second clips share a start image, an end image, camera calibration, captions and seed. The straight path is the reference. The two arcs move the midpoint 3.5 m left or right while keeping both endpoints fixed. [First frame](first.png) · [Last frame](last.png) · [Metric camera geometry](camera.json) · [Prompt](prompt.txt) · [Scene caption](scene.txt)
 
 Install the F2LF environment and download the F2LF bundle. Run from the repository root. [F2LF setup](../../../src/f2lf/README.md) · [Weight bundles](../../../docs/weights.md)
 
 ```bash
 INPUT=examples/f2lf/directions
-for variant in straight left-3.5m right-3.5m right-5m; do
+for variant in straight left-3.5m right-3.5m; do
   case "$variant" in
     straight) offset=0 ;;
     left-3.5m) offset=-3.5 ;;
     right-3.5m) offset=3.5 ;;
-    right-5m) offset=5 ;;
   esac
   python scripts/infer_f2lf.py --weights weights/f2lf \
     --a "$INPUT/first.png" --b "$INPUT/last.png" \
