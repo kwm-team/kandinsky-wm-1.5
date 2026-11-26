@@ -56,6 +56,8 @@ python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
 
 For a temporal batch, pass `--temporal-text hard` or `--temporal-text smooth` with `--input` and a JSON manifest. Each row includes the same `scene` and `captions` fields alongside `video_id` and `img_id`. Use `--overwrite` to rerun a temporal job at an existing output path.
 
+The motorcycle example uses one image and four schedules to show how the prompt changes when the rider enters the frame. The example includes the exact captions and batch command. [Motorcycle timing gallery and reproduction](../../examples/base-av/temporal-motorcycle/README.md)
+
 ## Continue a video
 
 ```sh

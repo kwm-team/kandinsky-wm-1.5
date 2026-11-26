@@ -43,6 +43,18 @@ Base AV renders from the PAI-Bench-G accident subset. [Input frames, prompts and
 | --- | --- | --- |
 | ![Intersection rollover](examples/accidents/intersection-rollover/video.webp) | ![Highway trailer collision](examples/accidents/highway-trailer-collision/video.webp) | ![Pickup and SUV collision](examples/accidents/pickup-and-suv/video.webp) |
 
+### Temporal text · motorcycle entry
+
+Four Base AV runs use the same image and seed. The prompt schedules move the rider's entry through the clip. The times below label the requested entry windows. [Prompts and reproduction command](examples/base-av/temporal-motorcycle/README.md)
+
+| Prompted at 0.5 s | Prompted at 1.5 s |
+| --- | --- |
+| ![Prompted motorcycle entry at 0.5 seconds](examples/base-av/temporal-motorcycle/entry-0.5s.webp) | ![Prompted motorcycle entry at 1.5 seconds](examples/base-av/temporal-motorcycle/entry-1.5s.webp) |
+
+| Prompted at 2.5 s | Prompted at 3.5 s |
+| --- | --- |
+| ![Prompted motorcycle entry at 2.5 seconds](examples/base-av/temporal-motorcycle/entry-2.5s.webp) | ![Prompted motorcycle entry at 3.5 seconds](examples/base-av/temporal-motorcycle/entry-3.5s.webp) |
+
 ### UCPE camera control
 
 Four continuations share a reference frame, prompt and seed. [Shared reference frame](examples/reference.jpg) · [Shared prompt](examples/prompt.txt)

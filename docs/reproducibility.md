@@ -21,6 +21,7 @@ The table compares independently executed native and release code on NVIDIA H100
 | Base AV I2V | 120 frames at 768×512 | Identical MP4 and decoded RGB |
 | Base AV V2V | 25 frames at 384×256 with a 9-frame prefix | Identical MP4 and decoded RGB |
 | Base AV temporal text | 120 frames at 768×512 in hard mode and 384×256 in both modes | Identical MP4 and decoded RGB |
+| Base AV motorcycle entry | Four temporal prompt schedules at 768×512 | All four release MP4s match their source renders byte for byte |
 | UCPE I2V | 121 frames at 768×512, left-turn trajectory | Identical latents and decoded RGB |
 | UCPE T2V and V2V | 9 frames at 384×256 for each mode | Identical latents and decoded RGB |
 | AR | 144 frames at 768×512 over 10 chunks, including a history reset | Identical latents and decoded RGB |

@@ -20,6 +20,6 @@ python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
   --output outputs/intersection-rollover.mp4
 
 ffmpeg -i outputs/intersection-rollover.mp4 -an \
-  -vf 'fps=12,scale=432:-2:flags=lanczos' -c:v libwebp_anim \
-  -quality 80 -compression_level 4 -loop 0 outputs/intersection-rollover.webp
+  -vf 'fps=12,scale=480:-2:flags=lanczos' -c:v libwebp_anim -preset picture \
+  -quality 95 -compression_level 6 -loop 0 outputs/intersection-rollover.webp
 ```
