@@ -9,19 +9,25 @@ from pathlib import Path
 from .weights import MANIFEST, MODELS, inspect_bundle, read_manifest
 
 
-def fetch(repo_id: str, revision: str, output: Path) -> None:
+def fetch(repo_id: str, revision: str, output: Path, *, model: str | None = None) -> None:
     if not re.fullmatch("[0-9a-fA-F]{40}", revision):
         raise ValueError("Pass a full 40-character Hub commit to --revision")
+    if model is not None and model not in MODELS:
+        raise ValueError(f"Unknown model: {model}")
     try:
         from huggingface_hub import snapshot_download
     except ImportError as exc:
         raise ValueError("Install the Hub extra with pip install -e '.[hub]'") from exc
     options = {"repo_id": repo_id, "revision": revision, "local_dir": output}
-    snapshot_download(**options, allow_patterns=[MANIFEST])
-    manifest = read_manifest(output)
-    snapshot_download(**options, allow_patterns=list(manifest.files))
-    inspect_bundle(output, expected_model=manifest.model, verify=True)
-    print(output.resolve())
+    prefix = f"{model}/" if model is not None else ""
+    target = output / model if model is not None else output
+    snapshot_download(**options, allow_patterns=[f"{prefix}{MANIFEST}"])
+    manifest = read_manifest(target)
+    if model is not None and manifest.model != model:
+        raise ValueError(f"Expected {model} bundle, found {manifest.model}")
+    snapshot_download(**options, allow_patterns=[f"{prefix}{name}" for name in manifest.files])
+    inspect_bundle(target, expected_model=manifest.model, verify=True)
+    print(target.resolve())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,7 +42,8 @@ def main(argv: list[str] | None = None) -> int:
     hub = commands.add_parser("fetch", help="Download and verify the files in a pinned Hub manifest")
     hub.add_argument("--repo-id", required=True)
     hub.add_argument("--revision", required=True)
-    hub.add_argument("--output", type=Path, required=True)
+    hub.add_argument("--model", choices=MODELS, help="Download this model subfolder from a shared repository")
+    hub.add_argument("--output", type=Path, required=True, help="Local directory that receives the selected files")
     args = parser.parse_args(argv)
     try:
         if args.command == "inspect":
@@ -48,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
                 "sha256_verified": args.verify,
             }, indent=2))
         else:
-            fetch(args.repo_id, args.revision, args.output)
+            fetch(args.repo_id, args.revision, args.output, model=args.model)
     except (OSError, ValueError) as exc:
         print(f"kwm-av: {exc}", file=sys.stderr)
         return 2

@@ -1,6 +1,6 @@
 # Weight bundles
 
-The release has one self-contained inference bundle per model, including its text conditioning and video components. The model code runs from this repository. Hugging Face Hub is the distribution point for versioned weight files.
+The release has one self-contained inference bundle per model, including its text conditioning and video components. The four bundles are subfolders of a single Hugging Face model repository. [Kandinsky WM 1.5 AV weights](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV)
 
 | Model | Local directory | Download size | Weight contents |
 |---|---|---:|---|
@@ -11,10 +11,11 @@ The release has one self-contained inference bundle per model, including its tex
 
 AR includes its compatible text conditioning assets under `text/`. It can also accept precomputed caption features. [AR input formats](../src/ar/README.md)
 
-The bundle's `bundle.json` records its model identifier, relative file paths, byte counts and SHA-256 digests. The downloader uses the manifest to fetch exactly the release payload. Pass a full commit hash from the model card so the manifest and weights come from the same Hub revision.
+Each subfolder has a `bundle.json` with its model identifier, relative file paths, byte counts and SHA-256 digests. Pass a full commit hash from the model card so the manifest and weights come from the same Hub revision. With `--model base-av --output weights`, the downloader writes `weights/base-av/` and verifies the payload.
 
 ```bash
-kwm-av fetch --repo-id "$HF_REPO_ID" --revision "$HF_COMMIT" --output weights/base-av
+kwm-av fetch --repo-id kandinskylab/Kandinsky-WM-1.5-AV \
+  --revision "$HF_COMMIT" --model base-av --output weights
 kwm-av inspect weights/base-av --model base-av --verify
 ```
 

@@ -1,4 +1,12 @@
+<div align="center">
+
+<img src="assets/logo.png" width="760" alt="Kandinsky WM 1.5" />
+
 # Kandinsky WM 1.5 · Autonomous Driving
+
+[Model weights](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV) · [Hugging Face collection](https://huggingface.co/collections/kandinskylab/kandinsky-wm-15-6b0420ff37178b56f3ae1f14) · [Kandinsky WM 1.0](https://github.com/kandinskylab/kandinsky-wm) · [Habr article on WM 1.0](https://habr.com/ru/companies/sberbank/articles/1054966/)
+
+</div>
 
 Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. AR generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
 
@@ -9,22 +17,22 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 | **AR** | Render a longer sequence by carrying history across chunks | Initial context, text, standalone camera trajectory | [AR quickstart](src/ar/README.md) |
 | **F2LF** | Generate a transition between two calibrated views | First and last frames, text, standalone camera geometry | [F2LF quickstart](src/f2lf/README.md) |
 
-[Previous Kandinsky WM release](https://github.com/kandinskylab/kandinsky-wm) · [Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
+[Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
 
 ## Examples
 
 ### Base AV
 
-Select a reference frame to play the generated clip. These showcase clips use super-resolution. Each clip includes its original prompt.
+Select a WebP preview to play the generated MP4. These showcase clips use super-resolution. Each clip includes its original prompt.
 
 | Intersection collision | Driving in rain at night |
 | --- | --- |
-| [![Intersection collision reference frame](examples/base-av/intersection-collision/preview.jpg)](examples/base-av/intersection-collision/video.mp4) | [![Rainy night reference frame](examples/base-av/rainy-night/preview.jpg)](examples/base-av/rainy-night/video.mp4) |
+| [![Intersection collision reference frame](examples/base-av/intersection-collision/preview.webp)](examples/base-av/intersection-collision/video.mp4) | [![Rainy night reference frame](examples/base-av/rainy-night/preview.webp)](examples/base-av/rainy-night/video.mp4) |
 | [Input frame](examples/base-av/intersection-collision/reference.jpg) · [Prompt](examples/base-av/intersection-collision/prompt.txt) | [Input frame](examples/base-av/rainy-night/reference.jpg) · [Prompt](examples/base-av/rainy-night/prompt.txt) |
 
 | Motorcycle overtake | Opening car door |
 | --- | --- |
-| [![Motorcycle overtake reference frame](examples/base-av/motorcycle-overtake/preview.jpg)](examples/base-av/motorcycle-overtake/video.mp4) | [![Opening car door reference frame](examples/base-av/opening-car-door/preview.jpg)](examples/base-av/opening-car-door/video.mp4) |
+| [![Motorcycle overtake reference frame](examples/base-av/motorcycle-overtake/preview.webp)](examples/base-av/motorcycle-overtake/video.mp4) | [![Opening car door reference frame](examples/base-av/opening-car-door/preview.webp)](examples/base-av/opening-car-door/video.mp4) |
 | [Input frame](examples/base-av/motorcycle-overtake/reference.jpg) · [Prompt](examples/base-av/motorcycle-overtake/prompt.txt) | [Input frame](examples/base-av/opening-car-door/reference.jpg) · [Prompt](examples/base-av/opening-car-door/prompt.txt) |
 
 ### UCPE camera control
@@ -33,12 +41,12 @@ Four continuations share a reference frame, prompt and seed. Select a preview to
 
 | Left turn | Right turn |
 | --- | --- |
-| [![Left turn preview](examples/ucpe/left.jpg)](examples/ucpe/left.mp4) | [![Right turn preview](examples/ucpe/right.jpg)](examples/ucpe/right.mp4) |
+| [![Left turn preview](examples/ucpe/left.webp)](examples/ucpe/left.mp4) | [![Right turn preview](examples/ucpe/right.webp)](examples/ucpe/right.mp4) |
 | [Trajectory](examples/left.json) | [Trajectory](examples/right.json) |
 
 | Straight ahead | Stationary camera |
 | --- | --- |
-| [![Straight ahead preview](examples/ucpe/straight.jpg)](examples/ucpe/straight.mp4) | [![Stationary camera preview](examples/ucpe/stationary.jpg)](examples/ucpe/stationary.mp4) |
+| [![Straight ahead preview](examples/ucpe/straight.webp)](examples/ucpe/straight.mp4) | [![Stationary camera preview](examples/ucpe/stationary.webp)](examples/ucpe/stationary.mp4) |
 | [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
 
 ### F2LF endpoint control
@@ -47,7 +55,7 @@ Both clips share the same reference images, captions and endpoint poses. The cam
 
 | Straight path | Right arc |
 | --- | --- |
-| [![F2LF straight path preview](examples/f2lf/straight.jpg)](examples/f2lf/straight.mp4) | [![F2LF right arc preview](examples/f2lf/right.jpg)](examples/f2lf/right.mp4) |
+| [![F2LF straight path preview](examples/f2lf/straight.webp)](examples/f2lf/straight.mp4) | [![F2LF right arc preview](examples/f2lf/right.webp)](examples/f2lf/right.mp4) |
 
 ## PAI-Bench-G results
 
@@ -64,7 +72,7 @@ Qwen3-VL is the judge used for the reference benchmark run. ChatGPT is a supplem
 
 Use Python 3.12 in a dedicated environment for the model you want to run. Each quickstart lists its validated GPU environment and FlashAttention prerequisites. Run the commands below from the repository root.
 
-Obtain the release weight directory from the model card or use an already staged bundle. For Hub downloads, pin the model card's listed revision with `kwm-av fetch`. [Bundle format and download command](docs/weights.md)
+Choose a model subfolder from the Hub repository or use an already staged bundle. For Hub downloads, pin the model card's listed revision with `kwm-av fetch`. [Bundle format and download command](docs/weights.md)
 
 Install the weight utility and verify a staged bundle in the same environment.
 

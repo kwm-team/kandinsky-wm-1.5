@@ -99,6 +99,23 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "40-character"):
             fetch("example/base", "main", self.root)
 
+    def test_fetch_downloads_one_bundle_from_a_shared_repo(self):
+        self.manifest(model="ar")
+        (self.root / "ar").mkdir()
+        (self.root / "bundle.json").rename(self.root / "ar/bundle.json")
+        self.asset.parent.rename(self.root / "ar/transformer")
+        downloads = []
+        hub = SimpleNamespace(snapshot_download=lambda **options: downloads.append(options))
+
+        with patch.dict(sys.modules, {"huggingface_hub": hub}), redirect_stdout(StringIO()):
+            fetch("example/shared", "a" * 40, self.root, model="ar")
+
+        common = {"repo_id": "example/shared", "revision": "a" * 40, "local_dir": self.root}
+        self.assertEqual(downloads, [
+            {**common, "allow_patterns": ["ar/bundle.json"]},
+            {**common, "allow_patterns": [f"ar/{self.relpath}"]},
+        ])
+
 
 if __name__ == "__main__":
     unittest.main()
