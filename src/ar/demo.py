@@ -34,7 +34,7 @@ def parse_args(argv=None):
     parser.add_argument("--dit-graphs", action="store_true", help="Replay CUDA graphs for TP denoising reads")
     parser.add_argument("--compile-dit", action="store_true", help="Compile the DiT's rotary, affine and residual kernels")
     parser.add_argument("--vae-rank", type=int, help="Global VAE and browser rank, the final rank by default")
-    parser.add_argument("--vae-device", type=int, help="Local CUDA device for the VAE/browser process, including a shared GPU")
+    parser.add_argument("--vae-device", type=int, help="Local CUDA device for the VAE/browser process")
     parser.add_argument("--sr-rank", type=int, help="Global rank for optional SR, shared with the VAE by default")
     parser.add_argument("--sr-python", type=Path, help="Python in the separate Kandinsky SR environment")
     parser.add_argument("--sr-config", type=Path, help="Kandinsky video SR YAML with local or Hub weights")

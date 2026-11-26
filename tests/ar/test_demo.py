@@ -71,8 +71,8 @@ def test_visual_stack_gathers_hidden_state_only_before_output(monkeypatch):
 def test_roles_allow_one_gpu_and_split_across_three_nodes():
     solo = Layout.resolve(1)
     assert (solo.dit, solo.vae, solo.sr) == ((0,), 0, 0)
-    shared = Layout.resolve(8)
-    assert (shared.dit, shared.vae, shared.sr) == (tuple(range(7)), 7, 7)
+    dedicated = Layout.resolve(8)
+    assert (dedicated.dit, dedicated.vae, dedicated.sr) == (tuple(range(7)), 7, 7)
     split = Layout.resolve(24, dit_ranks=8, vae_rank=8, sr_rank=16)
     assert (split.dit, split.vae, split.sr) == (tuple(range(8)), 8, 16)
     with pytest.raises(ValueError, match="DiT"):
@@ -82,13 +82,14 @@ def test_roles_allow_one_gpu_and_split_across_three_nodes():
 
 
 def test_vae_process_can_share_a_local_card_with_a_dit_rank():
-    layout = Layout.resolve(8)
-    assert local_device_index(layout, 7, 7, None) == 7
-    assert local_device_index(layout, 7, 7, 0) == 0
-    assert local_device_index(layout, 1, 1, 0) == 1
+    dedicated = Layout.resolve(8, dit_ranks=7, vae_rank=7)
+    sp8 = Layout.resolve(9, dit_ranks=8, vae_rank=8)
+    assert local_device_index(dedicated, 7, 7, None) == 7
+    assert local_device_index(sp8, 8, 8, 7) == 7
+    assert local_device_index(sp8, 1, 1, 7) == 1
     args = parse_args(["--weights", "ar", "--image", "frame.jpg", "--prompt", "Drive",
-                       "--calibration", "drive.json", "--dit-parallel", "tp", "--vae-device", "0"])
-    assert (args.dit_parallel, args.vae_device) == ("tp", 0)
+                       "--calibration", "drive.json", "--dit-parallel", "sp", "--vae-device", "7"])
+    assert (args.dit_parallel, args.vae_device) == ("sp", 7)
 
 
 def test_drive_stationary_and_right_turn_preserve_opencv_camera_pose():
