@@ -23,17 +23,25 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 
 ### Base AV
 
-Select a WebP preview to open the generated MP4 file. These showcase clips use super-resolution. Each clip includes its original prompt.
+The gallery uses looping WebP. The Base AV examples use super-resolution and include their original prompts.
 
 | Intersection collision | Driving in rain at night |
 | --- | --- |
-| [![Intersection collision reference frame](examples/base-av/intersection-collision/preview.webp)](examples/base-av/intersection-collision/video.mp4) | [![Rainy night reference frame](examples/base-av/rainy-night/preview.webp)](examples/base-av/rainy-night/video.mp4) |
+| ![Intersection collision](examples/base-av/intersection-collision/preview.webp) | ![Rainy night](examples/base-av/rainy-night/preview.webp) |
 | [Input frame](examples/base-av/intersection-collision/reference.jpg) · [Prompt](examples/base-av/intersection-collision/prompt.txt) | [Input frame](examples/base-av/rainy-night/reference.jpg) · [Prompt](examples/base-av/rainy-night/prompt.txt) |
 
 | Motorcycle overtake | Opening car door |
 | --- | --- |
-| [![Motorcycle overtake reference frame](examples/base-av/motorcycle-overtake/preview.webp)](examples/base-av/motorcycle-overtake/video.mp4) | [![Opening car door reference frame](examples/base-av/opening-car-door/preview.webp)](examples/base-av/opening-car-door/video.mp4) |
+| ![Motorcycle overtake](examples/base-av/motorcycle-overtake/preview.webp) | ![Opening car door](examples/base-av/opening-car-door/preview.webp) |
 | [Input frame](examples/base-av/motorcycle-overtake/reference.jpg) · [Prompt](examples/base-av/motorcycle-overtake/prompt.txt) | [Input frame](examples/base-av/opening-car-door/reference.jpg) · [Prompt](examples/base-av/opening-car-door/prompt.txt) |
+
+### Accident scenes
+
+Base AV renders from the PAI-Bench-G accident subset. [Input frames, prompts and generation commands](examples/accidents/README.md)
+
+| Intersection rollover | Highway trailer collision | Pickup and SUV collision |
+| --- | --- | --- |
+| ![Intersection rollover](examples/accidents/intersection-rollover/video.webp) | ![Highway trailer collision](examples/accidents/highway-trailer-collision/video.webp) | ![Pickup and SUV collision](examples/accidents/pickup-and-suv/video.webp) |
 
 ### UCPE camera control
 
@@ -41,12 +49,12 @@ Four continuations share a reference frame, prompt and seed. [Shared reference f
 
 | Left turn | Right turn |
 | --- | --- |
-| [![Left turn preview](examples/ucpe/left.webp)](examples/ucpe/left.mp4) | [![Right turn preview](examples/ucpe/right.webp)](examples/ucpe/right.mp4) |
+| ![Left turn](examples/ucpe/left.webp) | ![Right turn](examples/ucpe/right.webp) |
 | [Trajectory](examples/left.json) | [Trajectory](examples/right.json) |
 
 | Straight ahead | Stationary camera |
 | --- | --- |
-| [![Straight ahead preview](examples/ucpe/straight.webp)](examples/ucpe/straight.mp4) | [![Stationary camera preview](examples/ucpe/stationary.webp)](examples/ucpe/stationary.mp4) |
+| ![Straight ahead](examples/ucpe/straight.webp) | ![Stationary camera](examples/ucpe/stationary.webp) |
 | [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
 
 ### F2LF endpoint control
@@ -55,7 +63,7 @@ Both clips share the same reference images, captions and endpoint poses. The cam
 
 | Straight path | Right arc |
 | --- | --- |
-| [![F2LF straight path preview](examples/f2lf/straight.webp)](examples/f2lf/straight.mp4) | [![F2LF right arc preview](examples/f2lf/right.webp)](examples/f2lf/right.mp4) |
+| ![F2LF straight path](examples/f2lf/straight.webp) | ![F2LF right arc](examples/f2lf/right.webp) |
 
 ## PAI-Bench-G results
 

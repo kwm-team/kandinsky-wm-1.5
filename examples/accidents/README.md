@@ -1,0 +1,25 @@
+# Base AV accident examples
+
+These looping WebPs use super-resolution renders from the Base AV checkpoint. The gallery shows selected cases from the benchmark's eight-scene accident subset. The input frame and original English prompt are included for each render. [PAI-Bench-G dataset](https://huggingface.co/datasets/shi-labs/physical-ai-bench-generation) · [Benchmark recipe](../../docs/benchmark.md)
+
+| Scene | Benchmark ID | Inputs | Video |
+| --- | --- | --- | --- |
+| Intersection rollover | `av_accident_2_2` | [Frame](intersection-rollover/reference.jpg) · [Prompt](intersection-rollover/prompt.txt) | [WebP](intersection-rollover/video.webp) |
+| Intersection collision | `av_accident_2_4` | [Frame](../base-av/intersection-collision/reference.jpg) · [Prompt](../base-av/intersection-collision/prompt.txt) | [WebP](../base-av/intersection-collision/preview.webp) |
+| Highway trailer collision | `av_accident_2_5` | [Frame](highway-trailer-collision/reference.jpg) · [Prompt](highway-trailer-collision/prompt.txt) | [WebP](highway-trailer-collision/video.webp) |
+| Pickup and SUV collision | `av_accident_2_6` | [Frame](pickup-and-suv/reference.jpg) · [Prompt](pickup-and-suv/prompt.txt) | [WebP](pickup-and-suv/video.webp) |
+
+Run from the repository root with the Base AV environment and weights installed. The MP4 below is a native-resolution render.
+
+```bash
+SCENE=examples/accidents/intersection-rollover
+python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
+  --image "$SCENE/reference.jpg" --prompt "$(cat "$SCENE/prompt.txt")" \
+  --seed 42 --output-frames 120 --visual-size 512 \
+  --num-steps 50 --scheduler-scale 5 --guidance-weight 5 \
+  --output outputs/intersection-rollover.mp4
+
+ffmpeg -i outputs/intersection-rollover.mp4 -an \
+  -vf 'fps=12,scale=432:-2:flags=lanczos' -c:v libwebp_anim \
+  -quality 80 -compression_level 4 -loop 0 outputs/intersection-rollover.webp
+```

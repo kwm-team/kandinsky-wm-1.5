@@ -8,8 +8,9 @@
 | `straight.json`, `left.json`, `right.json`, `stationary.json` | Four 121-frame camera paths for the controlled UCPE comparison |
 | `rollout.json` | 145 camera poses for a multi-chunk AR replay |
 | `f2lf/` | Two calibrated reference images, endpoint camera matrices, captions and straight and right-arc F2LF clips |
-| `base-av/` | Base AV showcase MP4s, conditioning frames and exact prompts |
-| `ucpe/` | Four generated UCPE clips and their previews |
+| `base-av/` | Animated Base AV clips, conditioning frames and exact prompts |
+| `accidents/` | PAI-Bench-G collision clips, conditioning frames and exact prompts |
+| `ucpe/` | Four animated UCPE clips |
 
 Each trajectory is a standalone JSON file. `camera_to_world` contains one homogeneous 4×4 transform per RGB frame index. Camera axes follow OpenCV conventions with x right, y down and z forward. World coordinates in these examples use the first camera as their origin and are measured in metres. The translation is the fourth column and the 3×3 rotation maps camera axes into world axes. `intrinsics` gives the pinhole matrix in pixels at the declared `image_size`, ordered as width and height. `fps` gives the sampling rate of `frame_indices`. The files use a shared intrinsics matrix for every pose.
 
