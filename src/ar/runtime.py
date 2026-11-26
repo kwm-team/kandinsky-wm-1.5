@@ -7,7 +7,13 @@ import torch.distributed as dist
 
 from .model import SolverSettings, StreamSettings
 from .rope import first_tail, retain_first_tail
-from .solver import PiFlowPolicy, build_solver_segments, rollout_policy
+from .solver import (
+    PiFlowPolicy,
+    apply_rollout_coefficients,
+    build_solver_segments,
+    precompute_rollout_coefficients,
+    rollout_policy,
+)
 from .stream import NativeStream
 
 
@@ -30,6 +36,19 @@ def install_single_caption_attention(model, backend: str) -> None:
             module.scaled_dot_product_attention = types.MethodType(attend, module)
 
 
+def active_camera_levels(sigmas, gate):
+    """Preserve levels that activate the camera gate in either inference dtype."""
+    if gate is None:
+        return (True,) * len(sigmas)
+    low, high = gate
+    time = sigmas.cpu() * 1000
+    active = torch.zeros_like(time, dtype=torch.bool)
+    for dtype in (torch.float32, torch.bfloat16):
+        clean = 1 - time.to(dtype) / 1000
+        active |= (clean >= low) & (clean <= high)
+    return tuple(active.tolist())
+
+
 class ARRuntime:
     """Own one transformer and its mutable state for a single video stream."""
 
@@ -46,6 +65,8 @@ class ARRuntime:
         seed: int,
         backend: str = "flash3",
         final_model=None,
+        process_group=None,
+        linear_rollout=False,
     ):
         if startup.ndim != 4 or startup.shape[0] != 1 or startup.shape[-1] != 16:
             raise ValueError(
@@ -63,7 +84,8 @@ class ARRuntime:
         self.seed = seed
         self.generator = torch.Generator(device=self.device)
         self.generator.manual_seed(seed)
-        self.distributed = dist.is_initialized() and dist.get_world_size() > 1
+        self.group = process_group if process_group is not None else dist.group.WORLD
+        self.distributed = dist.is_initialized() and dist.get_world_size(self.group) > 1
         self.text = self.prepare_text(text)
         self.schedule = build_solver_segments(
             solver.nfe,
@@ -71,6 +93,15 @@ class ARRuntime:
             solver.shift,
             solver.eps,
             self.device,
+        )
+        self.rollout_weights = (
+            precompute_rollout_coefficients(self.schedule, solver) if linear_rollout else None
+        )
+        gated_camera = linear_rollout and not any(
+            getattr(model, key, False) for key in ("use_raymap", "use_crepe", "use_rayrope")
+        )
+        self.read_camera_levels = active_camera_levels(
+            self.schedule[2], getattr(model, "ucpe_t", None) if gated_camera else None
         )
 
         capacity = 128
@@ -87,7 +118,7 @@ class ARRuntime:
             from .parallel import ParallelNativeStream
 
             stream_class = ParallelNativeStream
-            stream_kwargs["group"] = dist.group.WORLD
+            stream_kwargs["group"] = self.group
 
         def make_stream(transformer):
             install_single_caption_attention(transformer, backend)
@@ -103,6 +134,7 @@ class ARRuntime:
                 **stream_kwargs,
             )
             stream.infr_rope = True
+            stream.single_timestep = linear_rollout
             return stream
 
         self.stream = make_stream(model)
@@ -171,7 +203,7 @@ class ARRuntime:
 
     def initial_noise(self):
         shape = (self.solver.chunk_planes, *self.startup.shape[1:])
-        if not self.distributed or dist.get_rank() == 0:
+        if not self.distributed or dist.get_rank(self.group) == 0:
             value = torch.randn(
                 shape,
                 device=self.device,
@@ -181,7 +213,7 @@ class ARRuntime:
         else:
             value = torch.empty(shape, device=self.device, dtype=self.startup.dtype)
         if self.distributed:
-            dist.broadcast(value, src=0)
+            dist.broadcast(value, src=dist.get_global_rank(self.group, 0), group=self.group)
         return value
 
     def borrow_final_context(self):
@@ -236,23 +268,21 @@ class ARRuntime:
                 if self.final_stream is not None and index == self.solver.nfe:
                     self.borrow_final_context()
                     reader = self.final_stream
-                grid = reader.call(value, sigma, self.text).float()
-                policy = PiFlowPolicy(
-                    grid.reshape(planes, self.solver.grid_points, -1),
-                    value.reshape(planes, -1),
-                    sigma.expand(planes),
-                    span.expand(planes),
-                    self.solver.shift,
-                    self.solver.eps,
-                )
-                value, _ = rollout_policy(
-                    value.reshape(planes, -1),
-                    sigma.expand(planes, 1),
-                    src.expand(planes),
-                    dst.expand(planes),
-                    self.solver.total_substeps,
-                    policy,
-                )
+                grid = reader.call(
+                    value, sigma, self.text, use_ucpe=self.read_camera_levels[index - 1]
+                ).float().reshape(planes, self.solver.grid_points, -1)
+                value = value.reshape(planes, -1)
+                if self.rollout_weights is not None:
+                    value = apply_rollout_coefficients(value, grid, self.rollout_weights[index - 1])
+                else:
+                    policy = PiFlowPolicy(
+                        grid, value, sigma.expand(planes), span.expand(planes),
+                        self.solver.shift, self.solver.eps,
+                    )
+                    value, _ = rollout_policy(
+                        value, sigma.expand(planes, 1), src.expand(planes), dst.expand(planes),
+                        self.solver.total_substeps, policy,
+                    )
                 value = value.reshape(planes, *self.startup.shape[1:])
             if not torch.isfinite(value).all():
                 raise FloatingPointError("AR produced non-finite latents")

@@ -60,13 +60,13 @@ class VideoCodec:
             )
 
     @torch.inference_mode()
-    def encode_startup(self, image: Image) -> torch.Tensor:
+    def encode_startup(self, image: Image, *, opt_tiling: bool = True) -> torch.Tensor:
         rgb = torch.from_numpy(np.asarray(image.convert("RGB")).copy())
         pixels = rgb.to(self.device, dtype=torch.float16).permute(2, 0, 1)[
             None, :, None
         ]
         pixels = (pixels / 127.5 - 1).contiguous(memory_format=torch.channels_last_3d)
-        posterior = self.vae.encode(pixels).latent_dist
+        posterior = self.vae.encode(pixels, opt_tiling=opt_tiling).latent_dist
         # Match the stand transport's FP16 encode and FP32 latent rescaling.
         encoded = (
             (posterior.mode() * self.scale / self.scale)[0].permute(1, 2, 3, 0).float()

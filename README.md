@@ -14,7 +14,7 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 |---|---|---|---|
 | **Base AV** | Generate a driving clip or continue a video | Image or video prefix, text | [Base AV quickstart](src/base_av/README.md) |
 | **UCPE** | Generate or continue a clip with explicit camera control | Text, standalone camera trajectory, optional image or video prefix | [UCPE quickstart](src/ucpe/README.md) |
-| **AR** | Render a longer sequence by carrying history across chunks | Initial context, text, standalone camera trajectory | [AR quickstart](src/ar/README.md) |
+| **AR** | Render a longer sequence by carrying history across chunks | Initial context, text, camera trajectory or keyboard input | [AR quickstart](src/ar/README.md) · [Keyboard demo](docs/ar-demo.md) |
 | **F2LF** | Generate a transition between two calibrated views | First and last frames, text, standalone camera geometry | [F2LF quickstart](src/f2lf/README.md) |
 
 [Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
@@ -141,6 +141,8 @@ TORCH_COMPILE_DISABLE=1 python scripts/infer_ar.py --weights weights/ar \
 ```
 
 The AR guide covers direct prompt encoding, precomputed text features, the decoder and the optional final-step model. [AR quickstart](src/ar/README.md)
+
+For live driving, start the keyboard demo with the same AR bundle. The guide covers launch commands for one, two and three nodes, optional super-resolution and measured throughput. [Keyboard demo](docs/ar-demo.md)
 
 ## F2LF
 

@@ -124,6 +124,34 @@ def rollout_policy(
     return x_t, sigma_t
 
 
+def precompute_rollout_coefficients(schedule, settings):
+    """Evaluate the fixed PiFlow integration on its independent basis inputs."""
+    points = settings.grid_points
+    dtype = schedule[0].dtype
+    start = torch.zeros((points + 1, 1), dtype=dtype)
+    start[0] = 1
+    grid = torch.zeros((points + 1, points, 1), dtype=dtype)
+    grid[1:, :, 0] = torch.eye(points, dtype=dtype)
+    weights = []
+    for src, dst, sigma, _, span in zip(*(times.cpu() for times in schedule)):
+        time = sigma.expand(points + 1)
+        policy = PiFlowPolicy(
+            grid, start, time, span.expand(points + 1), settings.shift, settings.eps
+        )
+        value, _ = rollout_policy(
+            start, time[:, None], src.expand(points + 1), dst.expand(points + 1),
+            settings.total_substeps, policy,
+        )
+        weights.append(value[:, 0])
+    return torch.stack(weights).to(schedule[0].device)
+
+
+def apply_rollout_coefficients(start, velocity_grid, weights):
+    # Every substep is linear in the starting latent and the velocity grid.
+    # Coefficient evaluation changes only the order of floating-point operations.
+    return start * weights[0] + (velocity_grid * weights[1:][None, :, None]).sum(1)
+
+
 class GridOutLayer(torch.nn.Module):
     """Runs `grid_points` independent OutLayer copies on the same pre-head features
     and stacks their outputs on a new axis at dim=1, so the result broadcasts against

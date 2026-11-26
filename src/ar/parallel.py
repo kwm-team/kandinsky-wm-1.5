@@ -7,6 +7,15 @@ import types
 from .stream import NativeStream
 
 
+def local_caption_routing(sparse, text_cu):
+    """Use one cross-attention sequence on a shard that can split a frame."""
+    if text_cu.numel() != 2:
+        raise ValueError("AR token sharding supports one caption per solver call")
+    if sparse is not None and "rf_text_run_frames" in sparse:
+        return {key: value for key, value in sparse.items() if key != "rf_text_run_frames"}
+    return sparse
+
+
 class TokenGroup:
     def __init__(self, group):
         self.group = group
@@ -40,7 +49,7 @@ class ParallelNativeStream(NativeStream):
         self.tokens = TokenGroup(group)
         self.parallel_enabled = True
         self.local_cu = {}
-        for block in self.blocks:
+        for index, block in enumerate(self.blocks):
             original = block.forward
 
             def forward(
@@ -56,6 +65,8 @@ class ParallelNativeStream(NativeStream):
                 geometry,
                 *rest,
                 _original=original,
+                _first=index == 0,
+                _last=index == len(self.blocks) - 1,
             ):
                 if not self.parallel_enabled:
                     return _original(
@@ -63,7 +74,7 @@ class ParallelNativeStream(NativeStream):
                     )
                 if torch.is_grad_enabled():
                     raise RuntimeError("SP stream is inference only")
-                total = len(x)
+                total = len(indices)
                 start, stop, _ = self.tokens.bounds(total)
                 self.sp_span = (start, stop, total)
                 geo = geometry
@@ -73,18 +84,20 @@ class ParallelNativeStream(NativeStream):
                 if cu_key not in self.local_cu:
                     self.local_cu[cu_key] = vcu.new_tensor([0, stop - start])
                 value = _original(
-                    x[start:stop],
+                    x[start:stop] if _first else x,
                     text,
                     time,
                     rope,
                     self.local_cu[cu_key],
                     tcu,
                     indices[start:stop],
-                    sparse,
+                    local_caption_routing(sparse, tcu),
                     geo,
                     *rest,
                 )
-                return self.tokens.gather(value, total)
+                # Each block consumes the same local token interval. Attention
+                # gathers global KV separately. The output head sees all tokens.
+                return self.tokens.gather(value, total) if _last else value
 
             block.forward = types.MethodType(forward, block)
             self.originals.append((block, original))

@@ -18,6 +18,10 @@ MAX_JOBS=4 python -m pip install --no-build-isolation \
 
 Qwen caption encoding uses FlashAttention 2. Install the Hopper extension to use the default `--backend flash3` for the video transformer. [FlashAttention build instructions](https://github.com/Dao-AILab/flash-attention#flashattention-3-beta-release).
 
+## Drive with the keyboard
+
+The browser demo uses this AR bundle with keyboard-generated camera poses. The launch guide covers one to three nodes and optional video super-resolution. [Keyboard demo and timings](../../docs/ar-demo.md)
+
 ## Run a trajectory
 
 From the repository root, point the runner at the AR weight directory. The example uses the bundled text encoder and TurboVAE for video decoding.

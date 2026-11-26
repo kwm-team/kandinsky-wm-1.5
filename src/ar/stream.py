@@ -17,25 +17,31 @@ def pack(
     geometry=None,
     *,
     use_ucpe=True,
+    single_timestep=False,
 ):
     n, h, w, _ = frames.shape
     dev = frames.device
-    mask = torch.zeros(n, h, w, 1, device=dev, dtype=frames.dtype)
-    mask[types_ == 1] = 1
+    if single_timestep:
+        mask = (types_ == 1).to(frames.dtype).view(n, 1, 1, 1).expand(n, h, w, 1)
+    else:
+        mask = torch.zeros(n, h, w, 1, device=dev, dtype=frames.dtype)
+        mask[types_ == 1] = 1
     x = torch.cat((frames, torch.zeros_like(frames), mask), -1)
-    boundaries = torch.cat(
-        (
-            indices.new_zeros(1, dtype=torch.long),
-            (indices[1:] != indices[:-1]).nonzero().flatten() + 1,
+    sp = dict(layout, visual_shape=(n, h, w))
+    if single_timestep:
+        text_indices = indices[:1]
+        sp["carla_single_timestep"] = True
+    else:
+        boundaries = torch.cat(
+            (
+                indices.new_zeros(1, dtype=torch.long),
+                (indices[1:] != indices[:-1]).nonzero().flatten() + 1,
+            )
         )
-    )
-    ends = torch.cat((boundaries[1:], boundaries.new_tensor([n])))
-    sp = dict(
-        layout,
-        visual_shape=(n, h, w),
-        rf_time_idx={"video": indices.int(), "text": indices[boundaries].int()},
-        rf_text_run_frames=(ends - boundaries).int(),
-    )
+        ends = torch.cat((boundaries[1:], boundaries.new_tensor([n])))
+        text_indices = indices[boundaries]
+        sp["rf_text_run_frames"] = (ends - boundaries).int()
+    sp["rf_time_idx"] = {"video": indices.int(), "text": text_indices.int()}
     rope = [
         positions,
         torch.arange(h // 2, device=dev),
@@ -316,7 +322,12 @@ class NativeStream:
         self.calls[mode] += 1
         dev = value.device
         types_ = torch.full((len(value),), int(anchor), device=dev, dtype=torch.long)
-        table = torch.as_tensor([level, 0.0], device=dev, dtype=torch.float32)
+        single_timestep = getattr(self, "single_timestep", False)
+        if single_timestep and isinstance(level, torch.Tensor):
+            level = level.to(device=dev, dtype=torch.float32)
+            table = torch.stack((level, level.new_zeros(())))
+        else:
+            table = torch.as_tensor([level, 0.0], device=dev, dtype=torch.float32)
         return pack(
             self.model,
             value,
@@ -334,6 +345,7 @@ class NativeStream:
             },
             self.current_geometry,
             use_ucpe=use_ucpe,
+            single_timestep=single_timestep,
         ).float()
 
     def committed(self, anchor=False):

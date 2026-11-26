@@ -708,6 +708,7 @@ class DiffusionTransformer3D(nn.Module):
         # _nan_check(text_embed, "dit.input.text_embed")
         # _nan_check(pooled_text_embed, "dit.input.pooled_text_embed")
         # _nan_check(time, "dit.input.time")
+        single_timestep = (sparse_params or {}).get("carla_single_timestep", False)
         text_embed, text_rope_pos, text_cu_seqlens = _expand_rf_text_runs(text_embed, text_rope_pos, text_cu_seqlens, sparse_params)
         text_embed = self.text_embeddings(text_embed)
         # _nan_check(text_embed, "dit.after_text_embeddings")
@@ -754,7 +755,10 @@ class DiffusionTransformer3D(nn.Module):
 
         text_rope = self.text_rope_embeddings(text_rope_pos)
         text_indices = ((sparse_params or {}).get("rf_time_idx") or {}).get("text")
-        text_time_embed_idx = (text_indices if text_indices is not None else time_embed_idx).repeat_interleave(torch.diff(text_cu_seqlens), dim=0)
+        if single_timestep:
+            text_time_embed_idx = text_indices.repeat(len(text_embed))
+        else:
+            text_time_embed_idx = (text_indices if text_indices is not None else time_embed_idx).repeat_interleave(torch.diff(text_cu_seqlens), dim=0)
         for text_transformer_block in self.text_transformer_blocks:
             text_embed = text_transformer_block(text_embed, time_embed, text_rope, text_cu_seqlens, text_time_embed_idx)
 
@@ -774,11 +778,14 @@ class DiffusionTransformer3D(nn.Module):
             # Override whatever pre-patch shape the dataloader stored so PRoPE
             # gets the patches_y/x of the actual token grid.
             _, H_post, W_post = visual_shape
-            cu = visual_cu_seqlens
-            new_latent_shapes = []
-            for i in range(len(ucpe_inputs["viewmats"])):
-                lt = int(cu[i + 1].item() - cu[i].item())
-                new_latent_shapes.append((lt, int(H_post), int(W_post)))
+            if single_timestep:
+                new_latent_shapes = [tuple(visual_shape)]
+            else:
+                cu = visual_cu_seqlens
+                new_latent_shapes = []
+                for i in range(len(ucpe_inputs["viewmats"])):
+                    lt = int(cu[i + 1].item() - cu[i].item())
+                    new_latent_shapes.append((lt, int(H_post), int(W_post)))
             ucpe_inputs = dict(ucpe_inputs)
             ucpe_inputs["latent_shapes"] = new_latent_shapes
 
@@ -820,7 +827,9 @@ class DiffusionTransformer3D(nn.Module):
                 raise ValueError("RayMap token grid must match visual token grid")
 
         frame_indices = ((sparse_params or {}).get("rf_time_idx") or {}).get("video")
-        if frame_indices is None:
+        if single_timestep:
+            visual_time_embed_idx = text_indices.repeat(len(visual_embed))
+        elif frame_indices is None:
             visual_time_embed_idx = time_embed_idx.repeat_interleave(torch.diff(visual_cu_seqlens), dim=0)
         else:
             visual_time_embed_idx = frame_indices.repeat_interleave(visual_embed.shape[0] // frame_indices.numel()).to(device=x.device, dtype=torch.int32)
@@ -877,8 +886,9 @@ class DiffusionTransformer3D(nn.Module):
         visual_embed, visual_cu_seqlens = fractal_unflatten(visual_embed, visual_cu_seqlens, visual_shape, fractal=to_fractal)
         # _nan_check(visual_embed, "dit.after_fractal_unflatten")
 
-        frame_indices = ((sparse_params or {}).get("rf_time_idx") or {}).get("video")
-        if frame_indices is None:
+        if single_timestep:
+            visual_time_embed_idx = text_indices.repeat(len(visual_embed))
+        elif frame_indices is None:
             visual_time_embed_idx = time_embed_idx.repeat_interleave(torch.diff(visual_cu_seqlens), dim=0)
         else:
             visual_time_embed_idx = frame_indices.repeat_interleave(visual_embed.shape[0] // frame_indices.numel()).to(device=x.device, dtype=torch.int32)
