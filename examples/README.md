@@ -5,11 +5,13 @@
 | File | Use |
 |---|---|
 | `reference.jpg`, `prompt.txt` | Common I2V input |
-| `straight.json`, `left.json` | 121-frame camera input for a controlled UCPE comparison |
+| `straight.json`, `left.json`, `right.json`, `stationary.json` | Four 121-frame camera paths for the controlled UCPE comparison |
 | `rollout.json` | 145 camera poses for a multi-chunk PiFlow replay |
+| `base-av/` | Base AV showcase MP4s, conditioning frames and exact prompts |
+| `ucpe/` | Four generated UCPE clips and their previews |
 
 Each trajectory is a standalone JSON file. `camera_to_world` contains one homogeneous 4×4 transform per RGB frame index. Camera axes follow OpenCV conventions with x right, y down and z forward. World coordinates in these examples use the first camera as their origin and are measured in metres. The translation is the fourth column and the 3×3 rotation maps camera axes into world axes. `intrinsics` gives the pinhole matrix in pixels at the declared `image_size`, ordered as width and height. `fps` gives the sampling rate of `frame_indices`. The files use a shared intrinsics matrix for every pose.
 
 Run `python examples/make_trajectories.py` to regenerate the coordinates. Keep the prompt and seed fixed when comparing trajectories.
 
-The preview uses seed 42 and the shared reference frame in all three rows. Base AV uses the hard temporal prompt example. UCPE uses the left-turn trajectory and PiFlow uses the rollout trajectory. Both camera-conditioned rows use deterministic VAE decoding. [Temporal prompt example](../base_av/prompt_segments.example.json) · [GPU comparisons](../docs/reproducibility.md)
+Each UCPE gallery clip uses the shared reference frame, prompt and seed 42 with deterministic VAE decoding. See the repository README to play the videos side by side. [Video gallery](../README.md#examples) · [GPU comparisons](../docs/reproducibility.md)

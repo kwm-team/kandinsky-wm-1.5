@@ -2,8 +2,6 @@
 
 Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. PiFlow generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
 
-![Samples from Base AV with temporal prompts, UCPE with a left turn, and a PiFlow rollout](examples/generation_preview.jpg)
-
 | Model | Use it to | Inputs | Code |
 |---|---|---|---|
 | **Base AV** | Generate a driving clip or continue a video | Image or video prefix, text | [Base AV quickstart](base_av/README.md) |
@@ -11,6 +9,47 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 | **PiFlow** | Render a longer sequence by carrying history across chunks | Initial context, text, standalone camera trajectory | [PiFlow quickstart](piflow/README.md) |
 
 [Previous Kandinsky WM release](https://github.com/kandinskylab/kandinsky-wm) · [Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
+
+## Examples
+
+### Base AV
+
+Select a reference frame to play the generated clip. These showcase clips use super-resolution. Each clip includes its original prompt.
+
+| Intersection collision | Driving in rain at night |
+| --- | --- |
+| [![Intersection collision reference frame](examples/base-av/intersection-collision/preview.jpg)](examples/base-av/intersection-collision/video.mp4) | [![Rainy night reference frame](examples/base-av/rainy-night/preview.jpg)](examples/base-av/rainy-night/video.mp4) |
+| [Input frame](examples/base-av/intersection-collision/reference.jpg) · [Prompt](examples/base-av/intersection-collision/prompt.txt) | [Input frame](examples/base-av/rainy-night/reference.jpg) · [Prompt](examples/base-av/rainy-night/prompt.txt) |
+
+| Motorcycle overtake | Opening car door |
+| --- | --- |
+| [![Motorcycle overtake reference frame](examples/base-av/motorcycle-overtake/preview.jpg)](examples/base-av/motorcycle-overtake/video.mp4) | [![Opening car door reference frame](examples/base-av/opening-car-door/preview.jpg)](examples/base-av/opening-car-door/video.mp4) |
+| [Input frame](examples/base-av/motorcycle-overtake/reference.jpg) · [Prompt](examples/base-av/motorcycle-overtake/prompt.txt) | [Input frame](examples/base-av/opening-car-door/reference.jpg) · [Prompt](examples/base-av/opening-car-door/prompt.txt) |
+
+### UCPE camera control
+
+Four continuations share a reference frame, prompt and seed. Select a preview to play the clip. [Shared reference frame](examples/reference.jpg) · [Shared prompt](examples/prompt.txt)
+
+| Left turn | Right turn |
+| --- | --- |
+| [![Left turn preview](examples/ucpe/left.jpg)](examples/ucpe/left.mp4) | [![Right turn preview](examples/ucpe/right.jpg)](examples/ucpe/right.mp4) |
+| [Trajectory](examples/left.json) | [Trajectory](examples/right.json) |
+
+| Straight ahead | Stationary camera |
+| --- | --- |
+| [![Straight ahead preview](examples/ucpe/straight.jpg)](examples/ucpe/straight.mp4) | [![Stationary camera preview](examples/ucpe/stationary.jpg)](examples/ucpe/stationary.mp4) |
+| [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
+
+## PAI-Bench-G results
+
+The final Base AV checkpoint was evaluated on the image-to-video autonomous-driving subset. Scores are on a 0–100 scale and give each video equal weight. The accident subset is included in the 118-scene total. [PAI-Bench-G](https://github.com/SHI-Labs/physical-ai-bench/tree/main/generation) · [Reproduce the benchmark](docs/benchmark.md)
+
+| Final Base AV | Scenes | Qwen3-VL 235B ↑ | ChatGPT 6.1 Sol Extra High ↑ |
+| --- | ---: | ---: | ---: |
+| All AV scenes | 118 | **78.06** | **71.32** |
+| Accident scenes | 8 | **81.80** | **76.71** |
+
+Qwen3-VL is the judge used for the reference benchmark run. ChatGPT is a supplementary frame-based evaluation on the same clips.
 
 ## Installation
 
@@ -41,7 +80,7 @@ Base AV can also assign different prompts to different portions of a clip. [Temp
 
 ## UCPE
 
-Start from one image and compare `examples/straight.json` with `examples/left.json`. Both files specify camera-to-world matrices and pixel intrinsics independently of the image and prompt. The merged UCPE weights are loaded as one inference checkpoint.
+Start from one image and compare the four example camera paths. Each file specifies camera-to-world matrices and pixel intrinsics independently of the image and prompt. The merged UCPE weights are loaded as one inference checkpoint.
 
 ```bash
 python -m ucpe --weights-dir weights/ucpe --image examples/reference.jpg \
@@ -49,7 +88,7 @@ python -m ucpe --weights-dir weights/ucpe --image examples/reference.jpg \
   --deterministic --seed 42 --output outputs/ucpe-straight.mp4
 ```
 
-Repeat with `examples/left.json` and a different output path to compare the trajectories. UCPE also accepts a video prefix or generates from text and a calibrated trajectory. [UCPE quickstart](ucpe/README.md) · [Coordinate convention](docs/ucpe.md)
+Repeat with `examples/left.json`, `examples/right.json` or `examples/stationary.json` and a different output path. UCPE also accepts a video prefix or generates from text and a calibrated trajectory. [UCPE quickstart](ucpe/README.md) · [Coordinate convention](docs/ucpe.md)
 
 ## PiFlow
 

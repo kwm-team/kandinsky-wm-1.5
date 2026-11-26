@@ -26,13 +26,13 @@ def travel(frame: int) -> float:
     return 0.5 * acceleration * ramp_time**2 + cruise_speed * max(0, seconds - ramp_end)
 
 
-def write_path(path: Path, frames: int, radius: float | None = None) -> None:
+def write_path(path: Path, frames: int, radius: float | None = None, *, stationary: bool = False) -> None:
     indices = list(range(frames))
     header = {
         "fps": FPS, "image_size": SIZE, "frame_indices": indices, "intrinsics": INTRINSICS,
     }
     poses = [
-        [[round(value, 8) for value in row] for row in camera_pose(travel(index), radius)]
+        [[round(value, 8) for value in row] for row in camera_pose(0 if stationary else travel(index), radius)]
         for index in indices
     ]
     text = json.dumps(header, indent=2).removesuffix("\n}")
@@ -45,4 +45,6 @@ if __name__ == "__main__":
     root = Path(__file__).resolve().parent
     write_path(root / "straight.json", 121)
     write_path(root / "left.json", 121, radius=16)
+    write_path(root / "right.json", 121, radius=-16)
+    write_path(root / "stationary.json", 121, stationary=True)
     write_path(root / "rollout.json", 145)
