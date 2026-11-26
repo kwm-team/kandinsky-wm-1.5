@@ -1,4 +1,4 @@
-# PAI-Bench-G · Base AV
+# PAI-Bench-G · Autonomous driving
 
 The reported scores come from the final Base AV checkpoint's native-resolution I2V run on 118 autonomous-driving scenes. The setup used the benchmark's English prompts and conditioning images, seed 42, 120 frames at 24 fps, and 768×512 resolution. The sampler used 50 Euler schedule points, shift 5 and text guidance 5. The gallery shows separate super-resolution renders from the same checkpoint. [Benchmark dataset](https://huggingface.co/datasets/shi-labs/physical-ai-bench-generation)
 
@@ -94,3 +94,18 @@ PY
 ```
 
 The supplementary ChatGPT column comes from judging sampled video frames. To recompute it from the archived answers, select the final SFT rows in the linked CSV, average `score_percent` over all 118 scenes, and repeat over the eight IDs beginning with `av_accident_`. [Archived per-scene scores](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/bulygin/habr/physical_ai_av/research/pai_gpt_judge_20261116/per_scene_all_five.csv)
+
+## Compare models on AV118
+
+The Qwen3-VL results for Base AV, MiniMax H3, Cosmos3-Nano and Cosmos3-Edge share 118 scene IDs, 490 benchmark questions and the same answer keys. Scores are the mean of the per-video accuracies on a 0–100 scale. Eight scene IDs form the accident subset. The Cosmos runs used prompts adapted to their generator. Resolution, frame count and prompt processing can vary across the source runs. [Normalized per-scene scores](paibench-av118-scores.csv)
+
+| Model | Qwen · AV | Qwen · Accidents | ChatGPT · AV | ChatGPT · Accidents |
+| --- | ---: | ---: | ---: | ---: |
+| Kandinsky WM 1.5 Base AV | 78.06 | 81.80 | 71.32 | 76.71 |
+| MiniMax H3 | 76.84 | 76.07 | 71.42 | 76.15 |
+| Cosmos3-Nano | 74.94 | 67.18 | 68.98 | 49.63 |
+| Cosmos3-Edge | 65.91 | 34.79 | 60.15 | 15.00 |
+
+The ChatGPT comparison uses sampled frames. The MiniMax H3 values come from a separate ten-frame-per-clip review and its public aggregate is linked below. The archived frame-review answer key is heavily skewed toward yes answers. A yes-only baseline scores 92.00 on the AV macro average, so these results measure answer agreement on this question set. [Frame review protocol and baseline](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/bulygin/habr/physical_ai_av/research/pai_gpt_judge_20261116/report_all_five.txt) · [MiniMax H3 aggregate](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/bulygin/habr/physical_ai_av/research/pai_h3_chatgpt_20261116/results.json)
+
+To reproduce the table from the normalized CSV, group by `model`. Average `qwen_accuracy_percent` and, where available, `chatgpt_accuracy_percent`. Repeat with rows where `is_accident` is `1`. The published leaderboard uses its own generation and evaluation protocol. [Official leaderboard](https://huggingface.co/spaces/shi-labs/physical-ai-bench-leaderboard)

@@ -37,7 +37,7 @@ The default attention backend is FlashAttention 3 on Hopper. Use `--backend flas
 
 The reference comparison used eager execution (`TORCH_COMPILE_DISABLE=1`) and deterministic cuDNN kernels for the VAE (`--deterministic`). For distributed token sharding across two local GPUs, launch the same script with `torchrun --standalone --nproc-per-node=2 scripts/infer_ar.py` and pass the arguments above.
 
-The optional `--final-gan` selects the companion transformer on the last solver evaluation. This requires `final_transformer.safetensors`. The base transformer still provides the previous solver evaluations and commits all causal history.
+The default command loads `transformer.safetensors` for all eight denoiser evaluations in each chunk. With `--final-gan`, the same transformer handles evaluations one through seven and `final_transformer.safetensors` handles evaluation eight. The primary transformer commits the causal history in either mode. [Pinned weights and component files](../../docs/weights.md#ar-transformers)
 
 ### Camera coordinates
 

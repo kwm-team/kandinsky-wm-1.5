@@ -67,26 +67,28 @@ Both clips share the same reference images, captions and endpoint poses. The cam
 
 ## PAI-Bench-G results
 
-The final Base AV checkpoint was evaluated on the image-to-video autonomous-driving subset. Scores are on a 0–100 scale and give each video equal weight. The accident subset is included in the 118-scene total. [PAI-Bench-G](https://github.com/SHI-Labs/physical-ai-bench/tree/main/generation) · [Reproduce the benchmark](docs/benchmark.md)
+The compared runs cover the same 118 image-to-video scene IDs and benchmark questions. Each video contributes equally to the accuracy score. The eight accident scenes are included in the AV total. [PAI-Bench-G](https://github.com/SHI-Labs/physical-ai-bench/tree/main/generation) · [Protocol and scores](docs/benchmark.md)
 
-| Final Base AV | Scenes | Qwen3-VL 235B ↑ | ChatGPT 6.1 Sol Extra High ↑ |
-| --- | ---: | ---: | ---: |
-| All AV scenes | 118 | **78.06** | **71.32** |
-| Accident scenes | 8 | **81.80** | **76.71** |
+| Model | Qwen3-VL 235B · AV ↑ | Qwen3-VL 235B · Accidents ↑ | ChatGPT frame review · AV ↑ | ChatGPT frame review · Accidents ↑ |
+| --- | ---: | ---: | ---: | ---: |
+| **Kandinsky WM 1.5 Base AV** | **78.06** | **81.80** | 71.32 | 76.71 |
+| MiniMax H3 | 76.84 | 76.07 | 71.42¹ | 76.15¹ |
+| Cosmos3-Nano | 74.94 | 67.18 | 68.98 | 49.63 |
+| Cosmos3-Edge | 65.91 | 34.79 | 60.15 | 15.00 |
 
-Qwen3-VL is the judge used for the reference benchmark run. ChatGPT is a supplementary frame-based evaluation on the same clips.
+The Qwen scores share an evaluator and question set. Generation settings and prompt adaptation vary by model. The ChatGPT columns report supplementary sampled-frame reviews. ¹ MiniMax H3 used a separate ChatGPT review. [Per-scene scores](docs/paibench-av118-scores.csv) · [MiniMax H3 review](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/bulygin/habr/physical_ai_av/research/pai_h3_chatgpt_20261116/results.json)
 
 ## Installation
 
 Use Python 3.12 in a dedicated environment for the model you want to run. Each quickstart lists its validated GPU environment and FlashAttention prerequisites. Run the commands below from the repository root.
 
-Choose a model subfolder from the Hub repository or use an already staged bundle. For Hub downloads, pin the model card's listed revision with `kwm-av fetch`. [Bundle format and download command](docs/weights.md)
-
-Install the weight utility and verify a staged bundle in the same environment.
+Install the weight utility and download the model you want to run. The command below selects Base AV at the pinned release revision and verifies its files. Use `--model ucpe`, `--model ar` or `--model f2lf` to download another bundle. [Weight bundles and AR components](docs/weights.md)
 
 ```bash
 python -m pip install -e '.[hub]'
-kwm-av inspect weights/base-av --model base-av --verify
+kwm-av fetch --repo-id kandinskylab/Kandinsky-WM-1.5-AV \
+  --revision 4d0011bb8650201985e51d39b2a1d75240ab37b5 \
+  --model base-av --output weights
 ```
 
 ## Base AV
@@ -155,4 +157,4 @@ python scripts/infer_f2lf.py --weights weights/f2lf \
 | `src/kwm_av/` | Model-agnostic weight downloads and integrity checks |
 | `tests/`, `tools/` | Release checks and decoded-video comparison |
 
-The repository code uses the MIT license. See the third-party notices for included upstream code and the applicable Hub model cards for weight terms. [Code license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+The repository code uses the MIT license. [Code license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
