@@ -106,4 +106,6 @@ For the compiled TP7 profiles at 768×512, use `--benchmark-chunks 24 --warmup-c
 
 In a separate run, the shared-GPU profile delivered 19.33 fps after warm-up to a local MJPEG client using live steering and the bundled caption. The native-resolution profiles fall short of sustained 24 fps. The MPS test ran the same seven-GPU command with an MPS daemon for the selected GPUs. [NVIDIA MPS setup](https://docs.nvidia.com/deploy/mps/latest/common-tasks.html)
 
+For a smaller seven-GPU input, add `--size 624 416` to the TP7 command. The benchmark produced 24.50 JPEG-ready fps with CUDA MPS and 23.00 fps with the standard CUDA process setup. With MPS enabled, a separate live run delivered 24.00 fps after warm-up to a local MJPEG client.
+
 The demo precomputes the linear integration coefficients of each fixed PiFlow segment. This changes the floating-point operation order. The offline AR CLI retains the reference integration.

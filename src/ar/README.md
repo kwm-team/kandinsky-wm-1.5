@@ -9,8 +9,9 @@ The reference environment uses Python 3.12.9, PyTorch 2.7.0, CUDA 12.8, and an N
 ```bash
 uv sync --locked --python 3.12 --extra hub --extra ucpe-ar --group flash-build
 MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
-MAX_JOBS=4 uv pip install --no-build-isolation \
-  'git+https://github.com/Dao-AILab/flash-attention.git@6f8f0406eea522735d590c2d7b46139167b95b6e#subdirectory=hopper'
+MAX_JOBS=4 FLASH_ATTENTION_DISABLE_BACKWARD=TRUE FLASH_ATTENTION_DISABLE_SM80=TRUE \
+  uv pip install --no-build-isolation \
+  'git+https://github.com/Dao-AILab/flash-attention.git@7b0bfcc3d1f69786f0c4277c582ad58acdfb297d#subdirectory=hopper'
 source .venv/bin/activate
 ```
 
