@@ -21,18 +21,20 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 
 ## Examples
 
+Click a looping WebP to play its 1728×1152 MP4. Every clip was generated with the release code and upscaled with 2.25× video super-resolution. [Gallery generation and verification](docs/gallery.md)
+
 ### Base AV
 
-Click a looping WebP to play its MP4. The Base AV examples use super-resolution and include their original prompts.
+Each example includes its conditioning frame and generation prompt.
 
 | Intersection collision | Driving in rain at night |
 | --- | --- |
-| [![Intersection collision](examples/base-av/intersection-collision/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/intersection-collision.mp4) | [![Rainy night](examples/base-av/rainy-night/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/rainy-night.mp4) |
+| [![Intersection collision](examples/base-av/intersection-collision/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/intersection-collision.mp4) | [![Rainy night](examples/base-av/rainy-night/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/rainy-night.mp4) |
 | [Input frame](examples/base-av/intersection-collision/reference.jpg) · [Prompt](examples/base-av/intersection-collision/prompt.txt) | [Input frame](examples/base-av/rainy-night/reference.jpg) · [Prompt](examples/base-av/rainy-night/prompt.txt) |
 
 | Motorcycle overtake | Opening car door |
 | --- | --- |
-| [![Motorcycle overtake](examples/base-av/motorcycle-overtake/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/motorcycle-overtake.mp4) | [![Opening car door](examples/base-av/opening-car-door/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/opening-car-door.mp4) |
+| [![Motorcycle overtake](examples/base-av/motorcycle-overtake/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/motorcycle-overtake.mp4) | [![Opening car door](examples/base-av/opening-car-door/preview.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/opening-car-door.mp4) |
 | [Input frame](examples/base-av/motorcycle-overtake/reference.jpg) · [Prompt](examples/base-av/motorcycle-overtake/prompt.txt) | [Input frame](examples/base-av/opening-car-door/reference.jpg) · [Prompt](examples/base-av/opening-car-door/prompt.txt) |
 
 ### Accident scenes
@@ -41,7 +43,7 @@ Base AV renders from the PAI-Bench-G accident subset. [Input frames, prompts and
 
 | Intersection rollover | Highway trailer collision | Pickup and SUV collision |
 | --- | --- | --- |
-| [![Intersection rollover](examples/accidents/intersection-rollover/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/intersection-rollover.mp4) | [![Highway trailer collision](examples/accidents/highway-trailer-collision/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/highway-trailer-collision.mp4) | [![Pickup and SUV collision](examples/accidents/pickup-and-suv/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/pickup-and-suv.mp4) |
+| [![Intersection rollover](examples/accidents/intersection-rollover/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/accidents/intersection-rollover.mp4) | [![Highway trailer collision](examples/accidents/highway-trailer-collision/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/accidents/highway-trailer-collision.mp4) | [![Pickup and SUV collision](examples/accidents/pickup-and-suv/video.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/accidents/pickup-and-suv.mp4) |
 
 ### Temporal text · motorcycle entry
 
@@ -49,11 +51,11 @@ Four Base AV runs use the same image and seed. The prompt schedules move the rid
 
 | Prompted at 0.5 s | Prompted at 1.5 s |
 | --- | --- |
-| [![Prompted motorcycle entry at 0.5 seconds](examples/base-av/temporal-motorcycle/entry-0.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-0.5s.mp4) | [![Prompted motorcycle entry at 1.5 seconds](examples/base-av/temporal-motorcycle/entry-1.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-1.5s.mp4) |
+| [![Prompted motorcycle entry at 0.5 seconds](examples/base-av/temporal-motorcycle/entry-0.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-0.5s.mp4) | [![Prompted motorcycle entry at 1.5 seconds](examples/base-av/temporal-motorcycle/entry-1.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-1.5s.mp4) |
 
 | Prompted at 2.5 s | Prompted at 3.5 s |
 | --- | --- |
-| [![Prompted motorcycle entry at 2.5 seconds](examples/base-av/temporal-motorcycle/entry-2.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-2.5s.mp4) | [![Prompted motorcycle entry at 3.5 seconds](examples/base-av/temporal-motorcycle/entry-3.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-3.5s.mp4) |
+| [![Prompted motorcycle entry at 2.5 seconds](examples/base-av/temporal-motorcycle/entry-2.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-2.5s.mp4) | [![Prompted motorcycle entry at 3.5 seconds](examples/base-av/temporal-motorcycle/entry-3.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-3.5s.mp4) |
 
 ### UCPE camera control
 
@@ -61,12 +63,12 @@ Four continuations share a reference frame, prompt and seed. [Shared reference f
 
 | Left turn | Right turn |
 | --- | --- |
-| [![Left turn](examples/ucpe/left.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/ucpe/left.mp4) | [![Right turn](examples/ucpe/right.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/ucpe/right.mp4) |
+| [![Left turn](examples/ucpe/left.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/left.mp4) | [![Right turn](examples/ucpe/right.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/right.mp4) |
 | [Trajectory](examples/left.json) | [Trajectory](examples/right.json) |
 
 | Straight ahead | Stationary camera |
 | --- | --- |
-| [![Straight ahead](examples/ucpe/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/ucpe/straight.mp4) | [![Stationary camera](examples/ucpe/stationary.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/ucpe/stationary.mp4) |
+| [![Straight ahead](examples/ucpe/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/straight.mp4) | [![Stationary camera](examples/ucpe/stationary.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/stationary.mp4) |
 | [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
 
 ### F2LF endpoint control
@@ -75,7 +77,7 @@ Three camera paths share the same endpoints, captions and seed. The left and rig
 
 | Straight path | Left arc | Right arc |
 | --- | --- | --- |
-| [![F2LF straight path](examples/f2lf/directions/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/straight.mp4) | [![F2LF 3.5 metre left arc](examples/f2lf/directions/left-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/left-3.5m.mp4) | [![F2LF 3.5 metre right arc](examples/f2lf/directions/right-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-3.5m.mp4) |
+| [![F2LF straight path](examples/f2lf/directions/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/f2lf/directions/straight.mp4) | [![F2LF 3.5 metre left arc](examples/f2lf/directions/left-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/f2lf/directions/left-3.5m.mp4) | [![F2LF 3.5 metre right arc](examples/f2lf/directions/right-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/f2lf/directions/right-3.5m.mp4) |
 
 ## PAI-Bench-G results
 

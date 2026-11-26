@@ -37,17 +37,7 @@ torchrun --standalone --nproc-per-node=8 scripts/infer_base_av.py --mode i2v \
 
 Use the archived 118 native-resolution MP4s when recomputing the reported run. A fresh generation and judge run can produce a different score.
 
-To reproduce the showcase rendering workflow, use the original WM 1.5 checkout with its prepared `filename,prompt` AV CSV, weight bundle, inference Python and `ksr-infer` executable. The upscaled clips are written under `sr/`.
-
-```bash
-(
-  cd "$WM15_SOURCE"
-  NPROC_PER_NODE=8 PYTHON="$WM15_PYTHON" WM15_SR_CLI="$SR_CLI" \
-    bash scripts/run_generate_physical_ai_bench_v169.sh --mode i2v \
-    --model-dir "$WM15_BUNDLE" --input "$AV_CSV" \
-    --output-dir "$RUN/showcase" --seed 42 --sr
-)
-```
+The showcase uses the release inference scripts and a separate super-resolution pass. [Showcase inputs and rendering commands](gallery.md)
 
 ## Run the Qwen judge
 

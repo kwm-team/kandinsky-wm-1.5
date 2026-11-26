@@ -4,11 +4,11 @@ Each clip uses the same conditioning image, seed and model. The four prompt sche
 
 | Prompted entry at 0.5 s | Prompted entry at 1.5 s |
 | --- | --- |
-| [![Motorcycle entry prompted at 0.5 seconds](entry-0.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-0.5s.mp4) | [![Motorcycle entry prompted at 1.5 seconds](entry-1.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-1.5s.mp4) |
+| [![Motorcycle entry prompted at 0.5 seconds](entry-0.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-0.5s.mp4) | [![Motorcycle entry prompted at 1.5 seconds](entry-1.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-1.5s.mp4) |
 
 | Prompted entry at 2.5 s | Prompted entry at 3.5 s |
 | --- | --- |
-| [![Motorcycle entry prompted at 2.5 seconds](entry-2.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-2.5s.mp4) | [![Motorcycle entry prompted at 3.5 seconds](entry-3.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-3.5s.mp4) |
+| [![Motorcycle entry prompted at 2.5 seconds](entry-2.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-2.5s.mp4) | [![Motorcycle entry prompted at 3.5 seconds](entry-3.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-3.5s.mp4) |
 
 ## Reproduce the clips
 
@@ -26,14 +26,4 @@ The recipe generates native 768×512 MP4s at 24 fps. The Euler schedule uses 50 
 
 Separate single-GPU H100 runs with this command reproduced all four source MP4s byte for byte.
 
-The animated WebPs show the source checkpoint's four renders at 480×320. Each loop displays all 120 frames in about five seconds. [Original MP4 gallery](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/bulygin/html_samples/av_motorcycle_temporal_kwm15_hf_20261124/index.html)
-
-To make the same WebP previews from your generated MP4s, use FFmpeg with `libwebp_anim`.
-
-```bash
-for entry in 0.5 1.5 2.5 3.5; do
-  ffmpeg -i "outputs/temporal-motorcycle/av_motorcycle_1_0__entry_${entry}s__42.mp4" \
-    -vf scale=480:320:flags=lanczos -an -c:v libwebp_anim -preset picture \
-    -quality 95 -compression_level 6 -loop 0 "outputs/temporal-motorcycle/entry-${entry}s.webp"
-done
-```
+The gallery uses the regenerated renders. Each 480×320 WebP loop displays all 120 frames in about five seconds and opens its super-resolved MP4. [Super-resolution and WebP encoding](../../../docs/gallery.md#video-super-resolution)

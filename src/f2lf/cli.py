@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--weights", type=Path, required=True, help="Local F2LF bundle")
     parser.add_argument("--a", type=Path, required=True, help="First reference image")
     parser.add_argument("--b", type=Path, required=True, help="Last reference image")
+    parser.add_argument("--reference-latents", type=Path, help="Cached VAE anchors for these two reference images")
     parser.add_argument("--camera", type=Path, required=True, help="JSON with metric anchor poses and intrinsics")
     parser.add_argument("--prompt-file", type=Path, required=True)
     scene = parser.add_mutually_exclusive_group(required=True)
@@ -39,6 +40,7 @@ def main():
 
     from PIL import Image
     from .camera import HEIGHT, WIDTH, camera_path
+    from .references import load_reference_latents
 
     try:
         prompt = args.prompt_file.read_text(encoding="utf-8").strip()
@@ -52,6 +54,7 @@ def main():
             with Image.open(reference) as image:
                 if image.size not in ((WIDTH, HEIGHT), (2 * WIDTH, 2 * HEIGHT)):
                     raise ValueError("Reference images must be 768×512 or aligned 1536×1024")
+        anchors = load_reference_latents(args.reference_latents, args.a, args.b) if args.reference_latents else None
         if args.output.suffix.lower() != ".mp4" or args.output.exists():
             raise ValueError("--output must be a new .mp4 path")
         if args.latents_output and (args.latents_output.suffix != ".safetensors" or args.latents_output.exists()):
@@ -70,7 +73,7 @@ def main():
     from .pipeline import F2LFPipeline
 
     video = F2LFPipeline(args.weights, args.device)(
-        args.a, args.b, path, prompt, caption, args.seed, deterministic=args.deterministic,
+        args.a, args.b, path, prompt, caption, args.seed, deterministic=args.deterministic, reference_latents=anchors,
     )
     _save_new(args.output, lambda filename: imageio.mimwrite(
         filename, video.frames.numpy(), fps=24, codec="libx264", quality=None, macro_block_size=1,

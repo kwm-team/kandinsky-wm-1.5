@@ -10,3 +10,4 @@ outputs/
 generated/
 *.pt
 *.safetensors
+!examples/f2lf/directions/reference-latents.safetensors

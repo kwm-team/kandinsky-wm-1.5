@@ -1,5 +1,6 @@
 """Precision-preserving CUDA kernels for the reference F2LF sampler."""
 
+from contextlib import contextmanager
 from functools import lru_cache
 import os
 
@@ -8,6 +9,18 @@ def configure_environment():
     os.environ["TRITON_DEFAULT_FP_FUSION"] = "0"
     os.environ["TORCHINDUCTOR_EMULATE_PRECISION_CASTS"] = "1"
     os.environ.setdefault("TORCHINDUCTOR_COMPILE_THREADS", "1")
+
+
+@contextmanager
+def reference_matmul_precision():
+    import torch
+
+    previous = torch.get_float32_matmul_precision()
+    try:
+        torch.set_float32_matmul_precision("highest")
+        yield
+    finally:
+        torch.set_float32_matmul_precision(previous)
 
 
 def _rotate(x, rope):

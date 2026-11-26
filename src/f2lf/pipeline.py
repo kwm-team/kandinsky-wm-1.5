@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from types import MethodType
 
+import numpy as np
 from safetensors.torch import load_file
 import torch
 
@@ -13,7 +14,7 @@ from ucpe.runtime.model.dit import get_dit
 
 from .camera import BODY_PLANES, CameraPath, HEIGHT, WIDTH
 from .codec import VideoCodec
-from .kernels import configure
+from .kernels import configure, reference_matmul_precision
 from .sampling import Predictor, sample
 
 
@@ -47,7 +48,9 @@ def _text_features(weights, config, prompt, scene, device):
     clip_inputs = encoder.tokenizer(
         [scene], max_length=77, truncation=True, add_special_tokens=True, padding="max_length", return_tensors="pt",
     ).to(device)
-    pooled = encoder.clip(**clip_inputs).pooler_output
+    # The original text stage ran CLIP in full float32 before loading the VAE.
+    with reference_matmul_precision():
+        pooled = encoder.clip(**clip_inputs).pooler_output
     return tokens.cpu(), pooled.cpu()
 
 
@@ -84,12 +87,16 @@ class F2LFPipeline:
 
     @torch.inference_mode()
     def __call__(
-        self, first: Path, last: Path, path: CameraPath, prompt: str, scene: str, seed: int, *, deterministic: bool = False,
+        self, first: Path, last: Path, path: CameraPath, prompt: str, scene: str, seed: int, *,
+        deterministic: bool = False, reference_latents: np.ndarray | None = None,
     ) -> Generation:
-        codec = VideoCodec(self.weights / "vae", self.device)
-        anchors = torch.cat([codec.encode_image(first), codec.encode_image(last)]).float()
-        del codec
-        torch.cuda.empty_cache()
+        if reference_latents is None:
+            codec = VideoCodec(self.weights / "vae", self.device)
+            anchors = torch.cat([codec.encode_image(first), codec.encode_image(last)]).float()
+            del codec
+            torch.cuda.empty_cache()
+        else:
+            anchors = torch.from_numpy(reference_latents)
 
         positive = _text_features(self.weights, self.config["qwen"], prompt, scene, self.device)
         negative = load_file(self.weights / "negative.safetensors")
