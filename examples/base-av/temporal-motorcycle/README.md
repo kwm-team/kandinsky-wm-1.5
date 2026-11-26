@@ -4,11 +4,11 @@ Each clip uses the same conditioning image, seed and model. The four prompt sche
 
 | Prompted entry at 0.5 s | Prompted entry at 1.5 s |
 | --- | --- |
-| ![Motorcycle entry prompted at 0.5 seconds](entry-0.5s.webp) | ![Motorcycle entry prompted at 1.5 seconds](entry-1.5s.webp) |
+| [![Motorcycle entry prompted at 0.5 seconds](entry-0.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-0.5s.mp4) | [![Motorcycle entry prompted at 1.5 seconds](entry-1.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-1.5s.mp4) |
 
 | Prompted entry at 2.5 s | Prompted entry at 3.5 s |
 | --- | --- |
-| ![Motorcycle entry prompted at 2.5 seconds](entry-2.5s.webp) | ![Motorcycle entry prompted at 3.5 seconds](entry-3.5s.webp) |
+| [![Motorcycle entry prompted at 2.5 seconds](entry-2.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-2.5s.mp4) | [![Motorcycle entry prompted at 3.5 seconds](entry-3.5s.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/temporal-motorcycle/entry-3.5s.mp4) |
 
 ## Reproduce the clips
 

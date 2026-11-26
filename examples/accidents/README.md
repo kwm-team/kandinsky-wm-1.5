@@ -4,10 +4,10 @@ These looping WebPs use super-resolution renders from the Base AV checkpoint. Th
 
 | Scene | Benchmark ID | Inputs | Video |
 | --- | --- | --- | --- |
-| Intersection rollover | `av_accident_2_2` | [Frame](intersection-rollover/reference.jpg) · [Prompt](intersection-rollover/prompt.txt) | [WebP](intersection-rollover/video.webp) |
-| Intersection collision | `av_accident_2_4` | [Frame](../base-av/intersection-collision/reference.jpg) · [Prompt](../base-av/intersection-collision/prompt.txt) | [WebP](../base-av/intersection-collision/preview.webp) |
-| Highway trailer collision | `av_accident_2_5` | [Frame](highway-trailer-collision/reference.jpg) · [Prompt](highway-trailer-collision/prompt.txt) | [WebP](highway-trailer-collision/video.webp) |
-| Pickup and SUV collision | `av_accident_2_6` | [Frame](pickup-and-suv/reference.jpg) · [Prompt](pickup-and-suv/prompt.txt) | [WebP](pickup-and-suv/video.webp) |
+| Intersection rollover | `av_accident_2_2` | [Frame](intersection-rollover/reference.jpg) · [Prompt](intersection-rollover/prompt.txt) | [WebP](intersection-rollover/video.webp) · [MP4](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/intersection-rollover.mp4) |
+| Intersection collision | `av_accident_2_4` | [Frame](../base-av/intersection-collision/reference.jpg) · [Prompt](../base-av/intersection-collision/prompt.txt) | [WebP](../base-av/intersection-collision/preview.webp) · [MP4](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/base-av/intersection-collision.mp4) |
+| Highway trailer collision | `av_accident_2_5` | [Frame](highway-trailer-collision/reference.jpg) · [Prompt](highway-trailer-collision/prompt.txt) | [WebP](highway-trailer-collision/video.webp) · [MP4](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/highway-trailer-collision.mp4) |
+| Pickup and SUV collision | `av_accident_2_6` | [Frame](pickup-and-suv/reference.jpg) · [Prompt](pickup-and-suv/prompt.txt) | [WebP](pickup-and-suv/video.webp) · [MP4](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/accidents/pickup-and-suv.mp4) |
 
 Run from the repository root with the Base AV environment and weights installed. The MP4 below is a native-resolution render.
 
