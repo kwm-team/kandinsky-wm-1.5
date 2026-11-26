@@ -6,7 +6,8 @@
 |---|---|
 | `reference.jpg`, `prompt.txt` | Common I2V input |
 | `straight.json`, `left.json`, `right.json`, `stationary.json` | Four 121-frame camera paths for the controlled UCPE comparison |
-| `rollout.json` | 145 camera poses for a multi-chunk PiFlow replay |
+| `rollout.json` | 145 camera poses for a multi-chunk AR replay |
+| `f2lf/` | Two calibrated reference images, endpoint camera matrices, captions and straight and right-arc F2LF clips |
 | `base-av/` | Base AV showcase MP4s, conditioning frames and exact prompts |
 | `ucpe/` | Four generated UCPE clips and their previews |
 
@@ -15,3 +16,5 @@ Each trajectory is a standalone JSON file. `camera_to_world` contains one homoge
 Run `python examples/make_trajectories.py` to regenerate the coordinates. Keep the prompt and seed fixed when comparing trajectories.
 
 Each UCPE gallery clip uses the shared reference frame, prompt and seed 42 with deterministic VAE decoding. See the repository README to play the videos side by side. [Video gallery](../README.md#examples) · [GPU comparisons](../docs/reproducibility.md)
+
+The F2LF camera file stores two endpoint poses and shared intrinsics in a local East-North-Up frame. The runtime derives the path between those endpoints. The F2LF gallery fixes the references, captions and seed and varies only the lateral offset. [F2LF input format](../src/f2lf/README.md#camera-json)

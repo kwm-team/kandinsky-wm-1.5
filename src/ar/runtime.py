@@ -1,4 +1,4 @@
-"""PiFlow autoregression with a fixed startup image and causal rolling history."""
+"""Video autoregression with a fixed startup image and causal rolling history."""
 
 import types
 
@@ -30,7 +30,7 @@ def install_single_caption_attention(model, backend: str) -> None:
             module.scaled_dot_product_attention = types.MethodType(attend, module)
 
 
-class PiFlowRuntime:
+class ARRuntime:
     """Own one transformer and its mutable state for a single video stream."""
 
     def __init__(
@@ -212,13 +212,13 @@ class PiFlowRuntime:
         planes = self.solver.chunk_planes
         if poses.shape != (planes, 4, 4) or intrinsics.shape != (planes, 3, 3):
             raise ValueError(
-                "PiFlow requires four candidate pose and intrinsics samples per chunk"
+                "AR requires four candidate pose and intrinsics samples per chunk"
             )
         if not 1 <= accepted_planes <= planes:
             raise ValueError("Accepted length must be within the current chunk")
         if not self._ready:
             raise RuntimeError(
-                "The PiFlow stream has an active or failed generation call"
+                "The AR stream has an active or failed generation call"
             )
         # A failed call may have advanced the RNG or partially committed the cache.
         self._ready = False
@@ -255,7 +255,7 @@ class PiFlowRuntime:
                 )
                 value = value.reshape(planes, *self.startup.shape[1:])
             if not torch.isfinite(value).all():
-                raise FloatingPointError("PiFlow produced non-finite latents")
+                raise FloatingPointError("AR produced non-finite latents")
             if accepted_planes < planes:
                 stream.begin(
                     ids[:accepted_planes],

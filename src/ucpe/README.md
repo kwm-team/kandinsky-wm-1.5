@@ -13,7 +13,7 @@ compiler compatible with your PyTorch build.
 
 ```sh
 python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -r ucpe/requirements.txt packaging psutil ninja wheel
+python -m pip install -e . -r src/ucpe/requirements.txt packaging psutil ninja wheel
 MAX_JOBS=4 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
 MAX_JOBS=4 python -m pip install --no-build-isolation \
   'git+https://github.com/Dao-AILab/flash-attention.git@v2.7.4.post1#subdirectory=hopper'
@@ -74,7 +74,7 @@ Use the same image, prompt and seed with `examples/straight.json` and
 
 ## Verification
 
-Run the CPU tests with `python -m unittest discover -s ucpe/tests -v`.
+Run the CPU tests with `python -m unittest discover -s tests/ucpe -v`.
 Add `--deterministic` to the CLI to use eager execution and deterministic
 cuDNN for reference comparisons. With these settings on an H100, the
 packaged pipeline reproduced the native sampler's VAE input latents and

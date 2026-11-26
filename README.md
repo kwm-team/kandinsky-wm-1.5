@@ -1,12 +1,13 @@
 # Kandinsky WM 1.5 · Autonomous Driving
 
-Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. PiFlow generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
+Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. AR generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
 
 | Model | Use it to | Inputs | Code |
 |---|---|---|---|
-| **Base AV** | Generate a driving clip or continue a video | Image or video prefix, text | [Base AV quickstart](base_av/README.md) |
-| **UCPE** | Generate or continue a clip with explicit camera control | Text, standalone camera trajectory, optional image or video prefix | [UCPE quickstart](ucpe/README.md) |
-| **PiFlow** | Render a longer sequence by carrying history across chunks | Initial context, text, standalone camera trajectory | [PiFlow quickstart](piflow/README.md) |
+| **Base AV** | Generate a driving clip or continue a video | Image or video prefix, text | [Base AV quickstart](src/base_av/README.md) |
+| **UCPE** | Generate or continue a clip with explicit camera control | Text, standalone camera trajectory, optional image or video prefix | [UCPE quickstart](src/ucpe/README.md) |
+| **AR** | Render a longer sequence by carrying history across chunks | Initial context, text, standalone camera trajectory | [AR quickstart](src/ar/README.md) |
+| **F2LF** | Generate a transition between two calibrated views | First and last frames, text, standalone camera geometry | [F2LF quickstart](src/f2lf/README.md) |
 
 [Previous Kandinsky WM release](https://github.com/kandinskylab/kandinsky-wm) · [Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
 
@@ -39,6 +40,14 @@ Four continuations share a reference frame, prompt and seed. Select a preview to
 | --- | --- |
 | [![Straight ahead preview](examples/ucpe/straight.jpg)](examples/ucpe/straight.mp4) | [![Stationary camera preview](examples/ucpe/stationary.jpg)](examples/ucpe/stationary.mp4) |
 | [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
+
+### F2LF endpoint control
+
+Both clips share the same reference images, captions and endpoint poses. The camera takes a straight path in the first clip and passes 3.5 m to the right of the midpoint in the second. [First frame](examples/f2lf/first.png) · [Last frame](examples/f2lf/last.png) · [Camera geometry](examples/f2lf/camera.json) · [Prompt](examples/f2lf/prompt.txt) · [Scene caption](examples/f2lf/scene.txt)
+
+| Straight path | Right arc |
+| --- | --- |
+| [![F2LF straight path preview](examples/f2lf/straight.jpg)](examples/f2lf/straight.mp4) | [![F2LF right arc preview](examples/f2lf/right.jpg)](examples/f2lf/right.mp4) |
 
 ## PAI-Bench-G results
 
@@ -74,9 +83,9 @@ python -m base_av --mode i2v --model-dir weights/base-av \
   --seed 42 --output outputs/base-av.mp4
 ```
 
-For continuation, pass `--mode v2v`, an input video through `--video` and an observed prefix length through `--prefix-frames`. [Base AV quickstart](base_av/README.md)
+For continuation, pass `--mode v2v`, an input video through `--video` and an observed prefix length through `--prefix-frames`. [Base AV quickstart](src/base_av/README.md)
 
-Base AV can also assign different prompts to different portions of a clip. [Temporal prompt JSON and examples](base_av/README.md)
+Base AV can also assign different prompts to different portions of a clip. [Temporal prompt JSON and examples](src/base_av/README.md)
 
 ## UCPE
 
@@ -88,30 +97,45 @@ python -m ucpe --weights-dir weights/ucpe --image examples/reference.jpg \
   --deterministic --seed 42 --output outputs/ucpe-straight.mp4
 ```
 
-Repeat with `examples/left.json`, `examples/right.json` or `examples/stationary.json` and a different output path. UCPE also accepts a video prefix or generates from text and a calibrated trajectory. [UCPE quickstart](ucpe/README.md) · [Coordinate convention](docs/ucpe.md)
+Repeat with `examples/left.json`, `examples/right.json` or `examples/stationary.json` and a different output path. UCPE also accepts a video prefix or generates from text and a calibrated trajectory. [UCPE quickstart](src/ucpe/README.md) · [Coordinate convention](docs/ucpe.md)
 
-## PiFlow
+## AR
 
 Use `examples/rollout.json` to replay multiple chunks, including a history reset. The runtime advances the latent history with each generated chunk. Render the full example with the Turbo decoder.
 
 ```bash
-TORCH_COMPILE_DISABLE=1 python -m piflow --weights weights/piflow \
+TORCH_COMPILE_DISABLE=1 python -m ar --weights weights/ar \
   --image examples/reference.jpg --prompt-file examples/prompt.txt \
   --trajectory examples/rollout.json --deterministic --seed 42 \
-  --output outputs/piflow.mp4
+  --output outputs/ar.mp4
 ```
 
-The PiFlow guide covers direct prompt encoding, precomputed text features, the decoder and the optional final-step model. [PiFlow quickstart](piflow/README.md)
+The AR guide covers direct prompt encoding, precomputed text features, the decoder and the optional final-step model. [AR quickstart](src/ar/README.md)
+
+## F2LF
+
+Generate a five-second transition between two reference images with calibrated camera poses. Use `--offset-m 3.5` and a new output path to generate a right arc between the same anchors.
+
+```bash
+python -m f2lf --weights weights/f2lf \
+  --a examples/f2lf/first.png --b examples/f2lf/last.png \
+  --camera examples/f2lf/camera.json \
+  --prompt-file examples/f2lf/prompt.txt --scene-file examples/f2lf/scene.txt \
+  --deterministic --seed 2026102991 --output outputs/f2lf-straight.mp4
+```
+
+[F2LF quickstart and camera format](src/f2lf/README.md)
 
 ## Repository layout
 
 | Directory | Responsibility |
 |---|---|
-| `base_av/` | Text-conditioned image and video inference |
-| `ucpe/` | Camera-conditioned inference and checkpoint export |
-| `piflow/` | Causal generation, solver, history and chunk decoding |
+| `src/base_av/` | Text-conditioned image and video inference |
+| `src/ucpe/` | Camera-conditioned inference and checkpoint export |
+| `src/ar/` | Causal generation, solver, history and chunk decoding |
+| `src/f2lf/` | Two-reference generation, metric camera geometry and RF sampling |
 | `examples/` | Reference frame, prompt and standalone metric camera paths |
-| `kwm_av/` | Model-agnostic weight downloads and integrity checks |
+| `src/kwm_av/` | Model-agnostic weight downloads and integrity checks |
 | `tests/`, `tools/` | Release checks and decoded-video comparison |
 
 The repository code uses the MIT license. See the third-party notices for included upstream code and the applicable Hub model cards for weight terms. [Code license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)

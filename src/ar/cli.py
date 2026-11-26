@@ -10,7 +10,7 @@ import time
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--weights", type=Path, required=True, help="Local PiFlow bundle"
+        "--weights", type=Path, required=True, help="Local AR bundle"
     )
     parser.add_argument(
         "--image", type=Path, required=True, help="Calibrated RGB startup image"
@@ -72,8 +72,8 @@ def load_text_features(args, device):
         raise ValueError("Provide a non-empty caption")
     weights = args.text_weights or args.weights / "text"
     config = json.loads((weights / "config.json").read_text(encoding="utf-8"))
-    if config.get("format") not in ("kwm-av-piflow-text", "kwm-av-ucpe"):
-        raise ValueError("Expected PiFlow or UCPE text assets and config")
+    if config.get("format") not in ("kwm-av-ar-text", "kwm-av-piflow-text", "kwm-av-ucpe"):
+        raise ValueError("Expected AR or UCPE text assets and config")
     encoder = TextEncoder({**config["qwen"], "max_length": 256}, weights, device)
     # The standalone stand encoder evaluates CLIP in full FP32, then caches both
     # features as FP16 and restores them in FP32 for the transformer.
@@ -95,7 +95,7 @@ def main():
 
     from .codec import OverlapDecoder, VideoCodec
     from .model import load_configuration, load_model
-    from .runtime import PiFlowRuntime
+    from .runtime import ARRuntime
     from .trajectory import load_trajectory, rollout_windows
 
     trajectory = load_trajectory(args.trajectory)
@@ -129,7 +129,7 @@ def main():
         raise ValueError("Image dimensions must be multiples of 16")
 
     if not torch.cuda.is_available():
-        raise RuntimeError("PiFlow requires a CUDA device")
+        raise RuntimeError("AR requires a CUDA device")
 
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     rank = int(os.environ.get("RANK", "0"))
@@ -179,7 +179,7 @@ def main():
                 if args.final_gan
                 else None
             )
-            runtime = PiFlowRuntime(
+            runtime = ARRuntime(
                 model,
                 startup,
                 torch.from_numpy(trajectory.camera_to_world[0]),

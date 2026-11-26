@@ -6,9 +6,10 @@ The release has one self-contained inference bundle per model, including its tex
 |---|---|---:|---|
 | Base AV | `weights/base-av/` | 27.3 GB | Video DiT, HunyuanVideo VAE, Qwen and CLIP encoders and tokenizers |
 | UCPE | `weights/ucpe/` | 25.7 GB | Merged camera-conditioned DiT, architecture config and matching conditioning components |
-| PiFlow | `weights/piflow/` | 34.0 GB | Autoregressive DiT, architecture and solver settings, HunyuanVideo VAE, TurboVAE decoder, matching Qwen and CLIP encoders and optional final-step DiT |
+| AR | `weights/ar/` | 34.0 GB | Autoregressive DiT, architecture and solver settings, HunyuanVideo VAE, TurboVAE decoder, matching Qwen and CLIP encoders and optional final-step DiT |
+| F2LF | `weights/f2lf/` | 25.7 GB | Two-reference DiT, canonical inference buffers, negative text embeddings, HunyuanVideo VAE and matching Qwen and CLIP encoders |
 
-PiFlow includes its compatible text conditioning assets under `text/`. It can also accept precomputed caption features. [PiFlow input formats](../piflow/README.md)
+AR includes its compatible text conditioning assets under `text/`. It can also accept precomputed caption features. [AR input formats](../src/ar/README.md)
 
 The bundle's `bundle.json` records its model identifier, relative file paths, byte counts and SHA-256 digests. The downloader uses the manifest to fetch exactly the release payload. Pass a full commit hash from the model card so the manifest and weights come from the same Hub revision.
 

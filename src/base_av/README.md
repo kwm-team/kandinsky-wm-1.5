@@ -8,7 +8,7 @@ The reference environment uses Python 3.12, PyTorch 2.7, CUDA 12.8 and FlashAtte
 
 ```sh
 python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -r base_av/requirements.txt
+python -m pip install -e . -r src/base_av/requirements.txt
 python -m pip install packaging ninja wheel
 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
@@ -46,11 +46,11 @@ python -m base_av --mode i2v --model-dir weights/base-av \
 
 For a five-second I2V clip at 24 FPS, supply a standalone JSON file with a `scene` string and exactly five `captions`. Describe the scene across the full clip in `scene`, and describe the action for each successive second in `captions`. The model conditions each segment on the scene and its caption.
 
-`hard` assigns one caption to each segment and is the default for `--prompt-segments`. `smooth` blends adjacent captions across segment boundaries. Both accept 120 or 121 output frames. In both modes, visual attention spans the whole clip to carry motion and scene content across segments. [Example prompt segments](prompt_segments.example.json)
+`hard` assigns one caption to each segment and is the default for `--prompt-segments`. `smooth` blends adjacent captions across segment boundaries. Both accept 120 or 121 output frames. In both modes, visual attention spans the whole clip to carry motion and scene content across segments. [Example prompt segments](../../examples/prompt_segments.json)
 
 ```sh
 python -m base_av --mode i2v --model-dir weights/base-av \
-  --image examples/reference.jpg --prompt-segments base_av/prompt_segments.example.json \
+  --image examples/reference.jpg --prompt-segments examples/prompt_segments.json \
   --temporal-text smooth --seed 42 --output drive-temporal.mp4
 ```
 
@@ -98,7 +98,7 @@ Use `--dry-run` to list resolved inputs and outputs, and `--start` and `--limit`
 Run argument, manifest and media tests from the repository root.
 
 ```sh
-python -m unittest discover -s base_av/tests -v
+python -m unittest discover -s tests/base_av -v
 ```
 
-For a GPU comparison, generate from the same weight bundle and compare decoded outputs with the same inputs, seed, resolution and sampler settings. Check image conditioning and video continuation separately. [Reproducing outputs](../docs/reproducibility.md)
+For a GPU comparison, generate from the same weight bundle and compare decoded outputs with the same inputs, seed, resolution and sampler settings. Check image conditioning and video continuation separately. [Reproducing outputs](../../docs/reproducibility.md)

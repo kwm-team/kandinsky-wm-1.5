@@ -3,11 +3,11 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-import piflow.runtime as runtime
-from piflow.cache import StreamCache
-from piflow.codec import OverlapDecoder
-from piflow.model import SolverSettings, StreamSettings
-from piflow.rope import first_tail, retain_first_tail
+import ar.runtime as runtime
+from ar.cache import StreamCache
+from ar.codec import OverlapDecoder
+from ar.model import SolverSettings, StreamSettings
+from ar.rope import first_tail, retain_first_tail
 
 
 @pytest.mark.parametrize("token_axis", [0, 2])
@@ -61,7 +61,7 @@ def test_ucpe_hook_keeps_a_device_float32_scalar(monkeypatch):
     model = SimpleNamespace(
         visual_transformer_blocks=[SimpleNamespace(ucpe_branch=branch)]
     )
-    session = runtime.PiFlowRuntime(
+    session = runtime.ARRuntime(
         model,
         torch.zeros(1, 2, 2, 16),
         torch.eye(4),

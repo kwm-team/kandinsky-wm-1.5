@@ -65,8 +65,17 @@ class BundleTests(unittest.TestCase):
 
     def test_rejects_wrong_model_bundle(self):
         self.manifest(model="ucpe")
-        with self.assertRaisesRegex(ValueError, "Expected piflow"):
-            inspect_bundle(self.root, expected_model="piflow")
+        with self.assertRaisesRegex(ValueError, "Expected ar"):
+            inspect_bundle(self.root, expected_model="ar")
+
+    def test_example_bundle_names_follow_the_release_labels(self):
+        for name in ("ar", "f2lf"):
+            self.manifest(model=name)
+            self.assertEqual(inspect_bundle(self.root, expected_model=name).model, name)
+
+    def test_existing_autoregressive_manifest_is_still_readable(self):
+        self.manifest(model="piflow")
+        self.assertEqual(inspect_bundle(self.root, expected_model="ar").model, "ar")
 
     def test_fetch_uses_the_same_pinned_revision_for_manifest_and_payload(self):
         self.manifest()

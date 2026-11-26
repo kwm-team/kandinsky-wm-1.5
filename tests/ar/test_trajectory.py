@@ -3,7 +3,7 @@ import json
 import numpy as np
 import pytest
 
-from piflow.trajectory import load_trajectory, rollout_windows
+from ar.trajectory import load_trajectory, rollout_windows
 
 
 def fixture(frames=136):

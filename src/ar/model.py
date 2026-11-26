@@ -38,8 +38,8 @@ class Configuration:
 
 def load_configuration(path: Path) -> Configuration:
     raw = json.loads(path.read_text(encoding="utf-8"))
-    if raw.get("format") != "kwm-av-piflow-v1":
-        raise ValueError("Expected a kwm-av-piflow-v1 weight directory")
+    if raw.get("format") not in ("kwm-av-ar-v1", "kwm-av-piflow-v1"):
+        raise ValueError("Expected an AR weight directory")
     solver = SolverSettings(**raw["solver"])
     stream = StreamSettings(
         **{k: raw["stream"][k] for k in StreamSettings.__dataclass_fields__}

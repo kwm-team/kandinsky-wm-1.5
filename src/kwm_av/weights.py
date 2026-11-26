@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 
-MODELS = ("base-av", "ucpe", "piflow")
+MODELS = ("base-av", "ucpe", "ar", "f2lf")
 MANIFEST = "bundle.json"
 
 
@@ -27,6 +27,8 @@ def read_manifest(root: Path) -> Bundle:
     if not isinstance(document, dict) or document.get("format_version") != 1:
         raise ValueError("Unsupported weight bundle manifest version")
     model = document.get("model")
+    if model == "piflow":
+        model = "ar"
     if model not in MODELS:
         raise ValueError(f"Unknown model in bundle manifest: {model!r}")
     entries = document.get("files")

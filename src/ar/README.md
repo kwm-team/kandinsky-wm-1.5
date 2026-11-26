@@ -1,16 +1,16 @@
-# PiFlow AV
+# AR · Autoregressive video
 
-Generate an autoregressive driving video from a starting image, a caption, and a trajectory. PiFlow uses eight transformer evaluations per chunk. It commits generated latents to a causal key/value cache and rolls that context forward as new poses arrive.
+Generate an autoregressive driving video from a starting image, a caption, and a trajectory. AR uses eight transformer evaluations per chunk. It commits generated latents to a causal key/value cache and rolls that context forward as new poses arrive.
 
 ## Install
 
-The reference environment uses Python 3.12.9, PyTorch 2.7.0, CUDA 12.8, and an NVIDIA H100. Build FlashAttention with the matching CUDA toolkit and a C++ compiler. Use a dedicated environment for PiFlow's dependency versions.
+The reference environment uses Python 3.12.9, PyTorch 2.7.0, CUDA 12.8, and an NVIDIA H100. Build FlashAttention with the matching CUDA toolkit and a C++ compiler. Use a dedicated environment for AR's dependencies.
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e . -r piflow/requirements.txt packaging psutil ninja wheel
+python -m pip install -e . -r src/ar/requirements.txt packaging psutil ninja wheel
 MAX_JOBS=4 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
 MAX_JOBS=4 python -m pip install --no-build-isolation \
   'git+https://github.com/Dao-AILab/flash-attention.git@v2.7.4.post1#subdirectory=hopper'
@@ -20,22 +20,22 @@ Qwen caption encoding uses FlashAttention 2. Install the Hopper extension to use
 
 ## Run a trajectory
 
-From the repository root, point the runner at the PiFlow weight directory. The example uses the bundled text encoder and TurboVAE for video decoding.
+From the repository root, point the runner at the AR weight directory. The example uses the bundled text encoder and TurboVAE for video decoding.
 
 ```bash
-TORCH_COMPILE_DISABLE=1 python -m piflow \
-  --weights weights/piflow \
+TORCH_COMPILE_DISABLE=1 python -m ar \
+  --weights weights/ar \
   --image examples/reference.jpg \
   --prompt-file examples/prompt.txt \
   --trajectory examples/rollout.json \
   --seed 42 \
   --deterministic \
-  --output outputs/piflow.mp4
+  --output outputs/ar.mp4
 ```
 
 The default attention backend is FlashAttention 3 on Hopper. Use `--backend flash2` or `--backend sdpa` on supported hardware if that extension is unavailable. Use `--decoder hunyuan` to decode with the base VAE. The starting image is encoded independently at one frame with Hunyuan. The output contains generated frames and starts at trajectory frame 1.
 
-The reference comparison used eager execution (`TORCH_COMPILE_DISABLE=1`) and deterministic cuDNN kernels for the VAE (`--deterministic`). The launcher also supports distributed token sharding. Replace `python -m piflow` with `torchrun --standalone --nproc-per-node=2 -m piflow` to run across two local GPUs.
+The reference comparison used eager execution (`TORCH_COMPILE_DISABLE=1`) and deterministic cuDNN kernels for the VAE (`--deterministic`). The launcher also supports distributed token sharding. Replace `python -m ar` with `torchrun --standalone --nproc-per-node=2 -m ar` to run across two local GPUs.
 
 The optional `--final-gan` selects the companion transformer on the last solver evaluation. This requires `final_transformer.safetensors`. The base transformer still provides the previous solver evaluations and commits all causal history.
 
@@ -50,7 +50,7 @@ The runtime retains the startup image in the cache while its temporal history ro
 ### Weight directory
 
 ```text
-piflow/
+ar/
   config.json
   transformer.safetensors
   vae/
@@ -69,7 +69,7 @@ Use `--text-weights` to point to a different copy of these assets or the compati
 
 ## Incremental inference
 
-`PiFlowRuntime` retains causal state across calls to `generate`. Initialize it once with a DiT, a startup latent, a pose and calibration, caption features, and the settings from `load_configuration`. Call
+`ARRuntime` retains causal state across calls to `generate`. Initialize it once with a DiT, a startup latent, a pose and calibration, caption features, and the settings from `load_configuration`. Call
 
 ```python
 latents = runtime.generate(
