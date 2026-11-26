@@ -80,6 +80,14 @@ Four continuations share a reference frame, prompt and seed. [Shared reference f
 | [![Straight ahead](examples/ucpe/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/straight.mp4) | [![Stationary camera](examples/ucpe/stationary.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/8060bc2656ea72acbc40d64838e05d5b4cd923f5/kandinsky-wm-1.5/av/ucpe/stationary.mp4) |
 | [Trajectory](examples/straight.json) | [Trajectory](examples/stationary.json) |
 
+### Autoregressive continuation
+
+A long driving scene continued by the AR checkpoint. The preview shows an excerpt at 10× playback speed. The full recording plays at 12× and runs for 2:23. [Keyboard demo](docs/ar-demo.md)
+
+[![Autoregressive driving scene preview](examples/ar/long-drive/preview.webp)](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/kunitsyn/ar-recordings/2026-11-27/P2-2xSR-30min-20261126-230947-stopped-12x.mp4)
+
+[Watch the full MP4](https://gigaeye-kandinsky-spark.obs.ru-moscow-1.hc.sbercloud.ru/kunitsyn/ar-recordings/2026-11-27/P2-2xSR-30min-20261126-230947-stopped-12x.mp4)
+
 ### F2LF endpoint control
 
 Three camera paths share the same endpoints, captions and seed. The left and right arcs shift the midpoint by 3.5 m. [Inputs and reproduction command](examples/f2lf/directions/README.md)
