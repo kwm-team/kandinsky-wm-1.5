@@ -64,20 +64,11 @@ All three H100 renders matched the original sampled latents and the MP4s from th
 
 The gallery uses a pinned public Kandinsky 6 VSR 2.0 checkpoint on the newly generated native MP4s. It combines a 1.125× pre-resize with a learned 2× latent upscaler and two denoiser evaluations per tile. A 120-frame clip repeats the final frame for the VAE's 121-frame input grid and trims that frame after upscaling. The output is 1728×1152, with the original frame count and timestamps. [VSR 2.0 weights](https://huggingface.co/kandinskylab/Kandinsky-6.0-VSR-2.0-distilled2steps-Diffusers/tree/36929c88a2cecc6d436444def27a89c8af0a37e6)
 
-Use a separate SR environment. The tested setup uses Python 3.12, PyTorch 2.7.0 with CUDA 12.8, PyAV 12.0.0 and the Diffusers revision below. The runner downloads the pinned weights on first use. Pass `--model-dir` to use a local copy of that revision. Repeat `--input` and `--output` to process several clips with one model load.
-
-```bash
-python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install av==12.0.0 numpy==1.26.4 pillow==11.1.0 accelerate==1.15.0 \
-  transformers==5.19.0 safetensors \
-  'git+https://github.com/huggingface/diffusers.git@1e004eb6ec9435349c4a6dd6d1c44c7e0fec6b40'
-python tools/upscale_video.py --input "$NATIVE_MP4" --output "$SR_MP4" --seed 42
-```
+For the SR pass, use seed 42 with the pinned VSR 2.0 weights and the [Base AV / F2LF environment](../src/base_av/README.md#environment). The MP4s linked from the main gallery contain the upscaled outputs.
 
 The gallery WebPs use the FFmpeg 7.0.2 build bundled with `imageio-ffmpeg` 0.6.0 on Linux. Use `PREVIEW_FPS=24` for motorcycle timing and F2LF, or `PREVIEW_FPS=12` for Base AV, accidents and UCPE.
 
 ```bash
-python -m pip install imageio-ffmpeg==0.6.0
 FFMPEG=$(python -c 'from imageio_ffmpeg import get_ffmpeg_exe; print(get_ffmpeg_exe())')
 "$FFMPEG" -threads 2 -i "$SR_MP4" -filter_threads 1 -an \
   -vf "fps=$PREVIEW_FPS,scale=480:320:flags=lanczos" \

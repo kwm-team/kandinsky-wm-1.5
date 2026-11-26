@@ -4,10 +4,12 @@ Freeze the input media, prompt, camera trajectory, seed, weight bundle, sampler 
 
 For Base AV, check image conditioning and video-prefix continuation separately. For UCPE, include a camera path with both translation and rotation. For AR, compare more than one chunk and include a run that crosses the cache reset boundary. For F2LF, vary the path between the same calibrated endpoints. Check startup, camera indexing and decoding separately when diagnosing a mismatch. For AR, also check the latent history.
 
-The comparison utility decodes both videos to RGB. It validates dimensions, FPS and decoded frame count before reporting the number of different frames, maximum and mean RGB error and PSNR. A null PSNR represents exact equality. Use `--exact` to give a failing exit code when decoded pixel values differ.
+Compare the dimensions, frame rate and decoded frame count of both outputs. To check decoded RGB for exact equality with FFmpeg, compare the frame hashes of both streams.
 
 ```bash
-python tools/compare_videos.py source.mp4 candidate.mp4 --exact
+ffmpeg -v error -i source.mp4 -map 0:v:0 -pix_fmt rgb24 -f framehash source.rgb.sha256
+ffmpeg -v error -i candidate.mp4 -map 0:v:0 -pix_fmt rgb24 -f framehash candidate.rgb.sha256
+diff -u source.rgb.sha256 candidate.rgb.sha256
 ```
 
 Both videos should be encoded with the same codec and settings when using exact mode. Compare the raw latents as a separate check when isolating the denoiser or solver. Exact reproducibility applies to the recorded inputs and runtime configuration.

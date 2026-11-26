@@ -86,6 +86,8 @@ class ModelLogger:
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
                 visual_result = func(self, *args, **kwargs)
+                if not getattr(self, "_collect_logs", True):
+                    return visual_result
                 for module_name, module in self.__dict__['_modules'].items():
                     if getattr(module, "get_logs", None) is not None:
                         for log_name, log_value in module.get_logs().items():

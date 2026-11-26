@@ -8,18 +8,18 @@ prefix, or generate from the prompt and trajectory alone.
 
 The reference environment uses Python 3.12, PyTorch 2.7.0 with CUDA 12.8,
 FlashAttention 2.7.4.post1 and the FlashAttention 3 Hopper extension.
-Install from the repository root on a machine with a CUDA toolkit and a
+Install from the repository root with `uv` on a machine with a CUDA toolkit and a
 compiler compatible with your PyTorch build.
 
 ```sh
-python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e . -r src/ucpe/requirements.txt packaging psutil ninja wheel
-MAX_JOBS=4 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
-MAX_JOBS=4 python -m pip install --no-build-isolation \
-  'git+https://github.com/Dao-AILab/flash-attention.git@v2.7.4.post1#subdirectory=hopper'
+uv sync --locked --python 3.12 --extra hub --extra ucpe-ar --group flash-build
+MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
+MAX_JOBS=4 uv pip install --no-build-isolation \
+  'git+https://github.com/Dao-AILab/flash-attention.git@6f8f0406eea522735d590c2d7b46139167b95b6e#subdirectory=hopper'
+source .venv/bin/activate
 ```
 
-The denoiser uses FlashAttention 3 when the extension is available. The Hugging Face and PyAV versions used in the reference environment are pinned in `requirements.txt`.
+The denoiser uses FlashAttention 3 when the extension is available. The `ucpe-ar` extra selects the locked Hugging Face and PyAV versions used for UCPE and AR.
 
 ## Run
 

@@ -67,6 +67,8 @@ class ARRuntime:
         final_model=None,
         process_group=None,
         linear_rollout=False,
+        dit_parallel="sp",
+        dit_graphs=False,
     ):
         if startup.ndim != 4 or startup.shape[0] != 1 or startup.shape[-1] != 16:
             raise ValueError(
@@ -86,6 +88,10 @@ class ARRuntime:
         self.generator.manual_seed(seed)
         self.group = process_group if process_group is not None else dist.group.WORLD
         self.distributed = dist.is_initialized() and dist.get_world_size(self.group) > 1
+        if dit_parallel not in ("sp", "tp"):
+            raise ValueError(f"Unknown DiT parallel strategy {dit_parallel!r}")
+        if dit_graphs and not (dit_parallel == "tp" and self.distributed and linear_rollout and backend == "flash3"):
+            raise ValueError("AR CUDA graphs require a multi-rank TP stream with FlashAttention 3 and linear rollout")
         self.text = self.prepare_text(text)
         self.schedule = build_solver_segments(
             solver.nfe,
@@ -114,13 +120,18 @@ class ARRuntime:
         poses[0] = startup_pose.to(device=self.device, dtype=torch.float32).double()
         stream_class = NativeStream
         stream_kwargs = {}
-        if self.distributed:
+        self.graph_readers = []
+        if self.distributed and dit_parallel == "sp":
             from .parallel import ParallelNativeStream
 
             stream_class = ParallelNativeStream
             stream_kwargs["group"] = self.group
 
         def make_stream(transformer):
+            if self.distributed and dit_parallel == "tp":
+                from .tensor_parallel import shard_visual_blocks
+
+                shard_visual_blocks(transformer, self.group, dtype=torch.bfloat16)
             install_single_caption_attention(transformer, backend)
             for block in transformer.visual_transformer_blocks:
                 if hasattr(block, "ucpe_branch"):
@@ -135,6 +146,11 @@ class ARRuntime:
             )
             stream.infr_rope = True
             stream.single_timestep = linear_rollout
+            if dit_graphs:
+                from .read_graph import GraphReader
+
+                stream.call = GraphReader(stream, self.device)
+                self.graph_readers.append(stream.call)
             return stream
 
         self.stream = make_stream(model)
@@ -152,6 +168,10 @@ class ARRuntime:
             self.stream.call(self.startup, 0.0, self.text, mode="commit", anchor=True)
             self.stream.committed(anchor=True)
         self._ready = True
+
+    def close(self):
+        for reader in self.graph_readers:
+            reader.close()
 
     def prepare_text(self, text):
         tokens, pooled = [

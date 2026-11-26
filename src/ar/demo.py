@@ -11,7 +11,7 @@ import statistics
 import subprocess
 import time
 
-from .demo_control import Drive, Layout, read_rgb, resize_intrinsics, write_rgb
+from .demo_control import Drive, Layout, local_device_index, read_rgb, resize_intrinsics, write_rgb
 
 
 def parse_args(argv=None):
@@ -30,7 +30,11 @@ def parse_args(argv=None):
     parser.add_argument("--backend", choices=("flash3", "flash2", "sdpa"), default="flash3")
     parser.add_argument("--final-gan", action="store_true", help="Use the optional transformer on the last solver evaluation")
     parser.add_argument("--dit-ranks", type=int, help="Count of contiguous DiT ranks, beginning at rank zero")
+    parser.add_argument("--dit-parallel", choices=("sp", "tp"), default="sp", help="Sequence or tensor parallel DiT")
+    parser.add_argument("--dit-graphs", action="store_true", help="Replay CUDA graphs for TP denoising reads")
+    parser.add_argument("--compile-dit", action="store_true", help="Compile the DiT's rotary, affine and residual kernels")
     parser.add_argument("--vae-rank", type=int, help="Global VAE and browser rank, the final rank by default")
+    parser.add_argument("--vae-device", type=int, help="Local CUDA device for the VAE/browser process, including a shared GPU")
     parser.add_argument("--sr-rank", type=int, help="Global rank for optional SR, shared with the VAE by default")
     parser.add_argument("--sr-python", type=Path, help="Python in the separate Kandinsky SR environment")
     parser.add_argument("--sr-config", type=Path, help="Kandinsky video SR YAML with local or Hub weights")
@@ -46,6 +50,12 @@ def parse_args(argv=None):
         parser.error("--sr-config and --sr-python must be supplied together")
     if args.sr_rank is not None and args.sr_config is None:
         parser.error("--sr-rank requires --sr-config")
+    if args.vae_device is not None and args.vae_device < 0:
+        parser.error("--vae-device must be nonnegative")
+    if args.dit_graphs and (args.dit_parallel != "tp" or args.backend != "flash3"):
+        parser.error("--dit-graphs requires --dit-parallel tp and FlashAttention 3")
+    if args.compile_dit and any(os.environ.get(name) == "1" for name in ("TORCH_COMPILE_DISABLE", "TORCHDYNAMO_DISABLE")):
+        parser.error("Unset TORCH_COMPILE_DISABLE and TORCHDYNAMO_DISABLE to use --compile-dit")
     if not 1 <= args.jpeg_quality <= 95:
         parser.error("--jpeg-quality must be between 1 and 95")
     if args.warmup_chunks < 0 or (args.benchmark_chunks is not None and args.benchmark_chunks < 2):
@@ -172,11 +182,17 @@ def load_dit(args, config, startup, trajectory, text, device, dit_group):
             config.solver.grid_points,
             device,
         )
+    if args.compile_dit:
+        from .compile_ops import configure
+
+        configure(dit)
+        if final is not None:
+            configure(final)
     return ARRuntime(
         dit, startup, torch.from_numpy(trajectory.camera_to_world[0]),
         torch.from_numpy(trajectory.intrinsics[0]), text, config.solver, config.stream,
         seed=args.seed, backend=args.backend, process_group=dit_group, final_model=final,
-        linear_rollout=True,
+        linear_rollout=True, dit_parallel=args.dit_parallel, dit_graphs=args.dit_graphs,
     )
 
 
@@ -324,6 +340,10 @@ def controller(args, config, trajectory, image, startup, codec, layout, device, 
                 "dit_median_ms": 1000 * statistics.median(row["dit_route_s"] for _, row in samples),
                 "native_width": image.width, "native_height": image.height,
                 "reset_frames": config.stream.reset_frames,
+                "dit_parallel": args.dit_parallel if len(layout.dit) > 1 else "single",
+                "dit_ranks": len(layout.dit),
+                "dit_graphs": args.dit_graphs,
+                "compile_dit": args.compile_dit,
                 "sr_scale": args.sr_scale if args.sr_config else None,
                 "final_gan": args.final_gan,
             }
@@ -332,6 +352,15 @@ def controller(args, config, trajectory, image, startup, codec, layout, device, 
 
 def main(argv=None):
     args = parse_args(argv)
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    rank = int(os.environ.get("RANK", "0"))
+    layout = Layout.resolve(world, dit_ranks=args.dit_ranks, vae_rank=args.vae_rank, sr_rank=args.sr_rank)
+    if args.compile_dit:
+        if rank in layout.dit:
+            os.environ["TRITON_DEFAULT_FP_FUSION"] = "0"
+            os.environ.setdefault("TORCHINDUCTOR_COMPILE_THREADS", "1")
+        else:
+            os.environ["TORCH_COMPILE_DISABLE"] = "1"
     import torch
     import torch.distributed as dist
     from PIL import Image
@@ -339,12 +368,14 @@ def main(argv=None):
     from .model import load_configuration
     from .trajectory import load_trajectory
 
-    world = int(os.environ.get("WORLD_SIZE", "1"))
-    rank = int(os.environ.get("RANK", "0"))
-    device = torch.device("cuda", int(os.environ.get("LOCAL_RANK", "0")))
-    layout = Layout.resolve(world, dit_ranks=args.dit_ranks, vae_rank=args.vae_rank, sr_rank=args.sr_rank)
+    if args.dit_graphs and len(layout.dit) < 2:
+        raise ValueError("--dit-graphs requires at least two DiT ranks")
     if not torch.cuda.is_available():
         raise RuntimeError("The AR demo requires CUDA")
+    index = local_device_index(layout, rank, int(os.environ.get("LOCAL_RANK", "0")), args.vae_device)
+    if index >= torch.cuda.device_count():
+        raise ValueError(f"Rank {rank} maps to CUDA device {index}, outside the visible devices")
+    device = torch.device("cuda", index)
     config = load_configuration(args.weights / "config.json")
     if args.reset_frames is not None:
         config = replace(config, stream=replace(config.stream, reset_frames=args.reset_frames))
@@ -383,8 +414,11 @@ def main(argv=None):
             if rank == layout.vae:
                 controller(args, config, trajectory, image, startup, codec, layout, device, runtime, intrinsics, sr_group)
             elif rank in layout.dit:
-                with torch.autocast("cuda", dtype=torch.bfloat16):
-                    dit_worker(runtime, config, intrinsics, layout, rank, device, dit_group)
+                try:
+                    with torch.autocast("cuda", dtype=torch.bfloat16):
+                        dit_worker(runtime, config, intrinsics, layout, rank, device, dit_group)
+                finally:
+                    runtime.close()
             elif rank == layout.sr:
                 sr = SuperResolution(args, device)
                 try:

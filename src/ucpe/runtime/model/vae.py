@@ -1,3 +1,7 @@
+# Copyright 2024 The Hunyuan Team and The HuggingFace Team.
+# SPDX-License-Identifier: Apache-2.0
+# Kandinsky adapts the Diffusers HunyuanVideo autoencoder in this file.
+
 """
 ver 0.2:
     * Optimal tiling

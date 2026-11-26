@@ -8,20 +8,29 @@
 
 </div>
 
-Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. AR generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
 
-| Model | Use it to | Inputs | Code |
-|---|---|---|---|
-| **Base AV** | Generate a driving clip or continue a video | Image or video prefix, text | [Base AV quickstart](src/base_av/README.md) |
-| **UCPE** | Generate or continue a clip with explicit camera control | Text, standalone camera trajectory, optional image or video prefix | [UCPE quickstart](src/ucpe/README.md) |
-| **AR** | Render a longer sequence by carrying history across chunks | Initial context, text, camera trajectory or keyboard input | [AR quickstart](src/ar/README.md) · [Keyboard demo](docs/ar-demo.md) |
-| **F2LF** | Generate a transition between two calibrated views | First and last frames, text, standalone camera geometry | [F2LF quickstart](src/f2lf/README.md) |
+## Overview
 
-[Example inputs and coordinate conventions](examples/README.md) · [Weight bundles](docs/weights.md) · [Reproducibility](docs/reproducibility.md)
+Kandinsky WM (World Model) 1.5 is a family of video generation models for autonomous driving. It adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to road scenes, using a latent video diffusion transformer, a HunyuanVideo VAE and Qwen and CLIP text encoders. The models generate synthetic driving footage for Physical AI research, with an emphasis on plausible vehicle motion, road geometry and interactions in both routine and rare scenarios. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
+
+Base AV was adapted on five-second clips of traffic, manoeuvres and collisions across different roads, weather and lighting. Its training uses flow matching, followed by fine-tuning with partial correction of the predicted denoising direction and merging of specialised models. The checkpoint supports an image or video prefix and can assign different prompts to different time windows.
+
+The release also includes explicit camera control, autoregressive continuation and generation between two reference frames. The short-clip models target approximately five seconds at 768×512 and 24 fps. AR extends a scene in successive 16-frame windows and accepts camera poses from either a trajectory file or the keyboard demo.
+
+## Model Zoo
+
+The four checkpoints are stored in one Hugging Face repository. Each has its own inference configuration and assets. The GitHub quickstarts run each checkpoint with its native pipeline. [Weight bundles and download sizes](docs/weights.md)
+
+| Checkpoint | Generation mode | Quickstart |
+| --- | --- | --- |
+| [**Base AV**](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV/tree/4d0011bb8650201985e51d39b2a1d75240ab37b5/base-av) | Image-to-video and video continuation with text or timed prompts | [Base AV](src/base_av/README.md) |
+| [**UCPE**](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV/tree/4d0011bb8650201985e51d39b2a1d75240ab37b5/ucpe) | Text, image or video conditioning with a calibrated camera trajectory | [UCPE](src/ucpe/README.md) |
+| [**AR**](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV/tree/4d0011bb8650201985e51d39b2a1d75240ab37b5/ar) | Autoregressive continuation with a calibrated camera trajectory or live steering | [AR](src/ar/README.md) · [Keyboard demo](docs/ar-demo.md) |
+| [**F2LF**](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV/tree/4d0011bb8650201985e51d39b2a1d75240ab37b5/f2lf) | First-to-last-frame generation along a calibrated camera path | [F2LF](src/f2lf/README.md) |
+
+[Example inputs and coordinate conventions](examples/README.md) · [Reproducibility](docs/reproducibility.md)
 
 ## Examples
-
-Click a looping WebP to play its 1728×1152 MP4. Every clip was generated with the release code and upscaled with 2.25× video super-resolution. [Gallery generation and verification](docs/gallery.md)
 
 ### Base AV
 
@@ -94,12 +103,14 @@ The Qwen scores share an evaluator and question set. Generation settings and pro
 
 ## Installation
 
-Use Python 3.12 in a dedicated environment for the model you want to run. Each quickstart lists its validated GPU environment and FlashAttention prerequisites. Run the commands below from the repository root.
+Install `uv` and run from the repository root on Linux x86-64. Use Python 3.12 and the CUDA 12.8 toolkit for the GPU quickstarts. The dependency sets are locked in `uv.lock`. Use `base-av-f2lf` for Base AV or F2LF, or `ucpe-ar` for UCPE or AR. Each quickstart gives the matching FlashAttention build command. [uv installation](https://docs.astral.sh/uv/getting-started/installation/)
 
-Install the weight utility and download the model you want to run. The command below selects Base AV at the pinned release revision and verifies its files. Use `--model ucpe`, `--model ar` or `--model f2lf` to download another bundle. [Weight bundles and AR components](docs/weights.md)
+Set up the Base AV environment and download its weights at the pinned release revision. Use `--model ucpe`, `--model ar` or `--model f2lf` to download another bundle. [Weight bundles and AR components](docs/weights.md)
 
 ```bash
-python -m pip install -e '.[hub]'
+uv sync --locked --python 3.12 --extra hub --extra base-av-f2lf --group flash-build
+MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
+source .venv/bin/activate
 kwm-av fetch --repo-id kandinskylab/Kandinsky-WM-1.5-AV \
   --revision 4d0011bb8650201985e51d39b2a1d75240ab37b5 \
   --model base-av --output weights
@@ -171,6 +182,6 @@ python scripts/infer_f2lf.py --weights weights/f2lf \
 | `scripts/` | Inference launchers for all four models |
 | `examples/` | Reference frame, prompt and standalone metric camera paths |
 | `src/kwm_av/` | Model-agnostic weight downloads and integrity checks |
-| `tests/`, `tools/` | Release checks and decoded-video comparison |
+| `tests/` | Release checks |
 
-The repository code uses the MIT license. [Code license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+Kandinsky code is available under MIT. The adapted video autoencoders retain Apache-2.0. [MIT license](LICENSE) · [Apache-2.0 license](LICENSE-APACHE)

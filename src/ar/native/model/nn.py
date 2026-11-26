@@ -255,9 +255,12 @@ class MultiheadSelfAttention(nn.Module):
         self.return_kv = False
 
     def get_qkv(self, x):
-        query = self.to_query(x)
-        key = self.to_key(x)
-        value = self.to_value(x)
+        if hasattr(self, "tp_qkv"):
+            query, key, value = self.tp_qkv(x).chunk(3, dim=-1)
+        else:
+            query = self.to_query(x)
+            key = self.to_key(x)
+            value = self.to_value(x)
 
         shape = query.shape[:-1] # for TP compatibility
         query = query.reshape(*shape, self.num_heads, -1)

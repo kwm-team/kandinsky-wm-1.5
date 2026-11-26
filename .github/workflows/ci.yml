@@ -8,24 +8,22 @@ permissions:
   contents: read
 
 jobs:
-  release-tools:
+  release-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: '3.12'
-      - run: python -m pip install torch==2.7.0 --index-url https://download.pytorch.org/whl/cpu
-      - run: python -m pip install . numpy scipy av pillow safetensors pytest ruff==0.9.10
-      - run: ruff check --select E9,F63,F7,F82 src scripts tests examples tools
-      - run: python -m compileall -q src scripts examples tools
-      - run: python -m pytest -q --import-mode=importlib tests
-      - run: kwm-av --help
+          version: '0.13.10'
+      - run: uv sync --locked --python 3.12 --group test
+      - run: uv run --no-sync ruff check --select E9,F63,F7,F82 src scripts tests examples
+      - run: uv run --no-sync python -m compileall -q src scripts examples
+      - run: uv run --no-sync python -m pytest -q --import-mode=importlib tests
+      - run: uv run --no-sync kwm-av --help
       - run: |
           for model in base_av ucpe ar f2lf; do
-            python "scripts/infer_$model.py" --help
+            uv run --no-sync python "scripts/infer_$model.py" --help
           done
-      - run: python scripts/demo_ar.py --help
-      - run: python tools/upscale_video.py --help
-      - run: python examples/make_trajectories.py
+      - run: uv run --no-sync python scripts/demo_ar.py --help
+      - run: uv run --no-sync python examples/make_trajectories.py
       - run: git diff --exit-code

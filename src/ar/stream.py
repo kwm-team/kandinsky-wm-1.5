@@ -69,7 +69,7 @@ def pack(
         txt["text"],
         txt["pooled"],
         table * 1000,
-        torch.tensor([0, n], device=dev, dtype=torch.int32),
+        torch.arange(2, device=dev, dtype=torch.int32) * n,
         txt["cu"],
         rope,
         txt["rope"],
@@ -224,6 +224,11 @@ class NativeStream:
         for cache in [*self.visual.values(), *self.ucpe.values()]:
             cache.place_for(self.context_owner)
 
+    def place_visual_context(self, module, layer, cache):
+        if cache.placed[layer] is None and (raw := cache.readable(layer)) is not None:
+            rotate = getattr(module, "_speedup_rotary", self.rotate)
+            cache.place(layer, rotate(raw[0], self.context_rope).type_as(raw[0]), raw[1])
+
     def visual_attention(self, module, layer, x, rope):
         q, k, v = module.get_qkv(x)
         q, k = module.norm_qk(q, k)
@@ -231,10 +236,7 @@ class NativeStream:
         raw_k = k
         q, k = rotate(q, rope).type_as(q), rotate(k, rope).type_as(k)
         cache = self.visual[self.slot]
-        if cache.placed[layer] is None and (raw := cache.readable(layer)) is not None:
-            cache.place(
-                layer, rotate(raw[0], self.context_rope).type_as(raw[0]), raw[1]
-            )
+        self.place_visual_context(module, layer, cache)
         keys, values = (
             cache.join(layer, k, v) if cache.placed[layer] is not None else (k, v)
         )
@@ -252,25 +254,17 @@ class NativeStream:
             cache.append(layer, raw_k.detach().clone(), v.detach().clone())
         return module.out_layer(out)
 
-    def ucpe_attention(self, module, layer, x):
+    def camera_functions(self, head_dim):
         from .native.model.prope import _prepare_apply_fns
 
-        norm = module.input_norm(x).type_as(x)
-        project = (
-            lambda p: p(norm)
-            .view(-1, module.num_heads, module.head_dim)
-            .permute(1, 0, 2)[None]
-        )
-        q, k, v = [project(p) for p in (module.q_proj, module.k_proj, module.v_proj)]
-        q, k = module.q_norm(q).type_as(q), module.k_norm(k).type_as(k)
-        if module.head_dim not in self.functions:
+        if head_dim not in self.functions:
 
             def make(geometry):
                 if geometry is None:
                     return None
                 mats, ks = geometry
                 return _prepare_apply_fns(
-                    head_dim=module.head_dim,
+                    head_dim=head_dim,
                     viewmats=mats[None],
                     Ks=ks[None],
                     patches_x=self.w // 2,
@@ -279,23 +273,48 @@ class NativeStream:
                     image_height=self.h * 8,
                 )
 
-            self.functions[module.head_dim] = (
+            self.functions[head_dim] = (
                 make(self.current_geometry),
                 make(self.context_geometry),
             )
-        (qfn, kvfn, ofn), past = self.functions[module.head_dim]
-        transform = lambda value, fn: module._downscale_to_reference_rms(
-            value, fn(value).to(value.dtype)
-        )
-        qt, kt, vt = transform(q, qfn), transform(k, kvfn), transform(v, kvfn)
-        cache = self.ucpe[self.slot]
+        return self.functions[head_dim]
+
+    @staticmethod
+    def transform_camera(module, value, function):
+        return module._downscale_to_reference_rms(value, function(value).to(value.dtype))
+
+    def place_camera_context(self, module, layer, cache, past):
         if cache.placed[layer] is None and (raw := cache.readable(layer)) is not None:
-            cache.place(layer, transform(raw[0], past[1]), transform(raw[1], past[1]))
+            cache.place(layer, *(self.transform_camera(module, value, past[1]) for value in raw))
+
+    def place_context(self, slot, use_ucpe):
+        for layer, block in enumerate(self.blocks):
+            self.place_visual_context(block.self_attention, layer, self.visual[slot])
+            if use_ucpe and hasattr(block, "ucpe_branch"):
+                branch = block.ucpe_branch
+                _, past = self.camera_functions(branch.head_dim)
+                self.place_camera_context(branch, layer, self.ucpe[slot], past)
+
+    def ucpe_attention(self, module, layer, x):
+        norm = module.input_norm(x).type_as(x)
+        project = (
+            lambda p: p(norm)
+            .view(-1, module.num_heads, module.head_dim)
+            .permute(1, 0, 2)[None]
+        )
+        q, k, v = [project(p) for p in (module.q_proj, module.k_proj, module.v_proj)]
+        q, k = module.q_norm(q).type_as(q), module.k_norm(k).type_as(k)
+        (qfn, kvfn, ofn), past = self.camera_functions(module.head_dim)
+        qt = self.transform_camera(module, q, qfn)
+        kt = self.transform_camera(module, k, kvfn)
+        vt = self.transform_camera(module, v, kvfn)
+        cache = self.ucpe[self.slot]
+        self.place_camera_context(module, layer, cache, past)
         keys, values = (
             cache.join(layer, kt, vt) if cache.placed[layer] is not None else (kt, vt)
         )
         out = self.attention(qt, keys, values, self.backend)
-        out = transform(out, ofn)
+        out = self.transform_camera(module, out, ofn)
         if self.mode == "commit":
             cache.append(layer, k.detach().clone(), v.detach().clone())
         return module.out_proj(out[0].permute(1, 0, 2).flatten(1))

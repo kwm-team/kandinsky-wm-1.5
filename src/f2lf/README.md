@@ -4,14 +4,14 @@ F2LF generates a five-second driving transition between two calibrated reference
 
 ## Install
 
-The reference environment uses Python 3.12, PyTorch 2.7, CUDA 12.8 and an NVIDIA H100 with the FlashAttention 3 Hopper extension. Use a dedicated environment with the matching CUDA toolkit and C++ compiler. The denoiser compiles its pointwise kernels on the first run.
+The reference environment uses Python 3.12, PyTorch 2.7, CUDA 12.8 and an NVIDIA H100 with the FlashAttention 3 Hopper extension. Install from the repository root using `uv` with the matching CUDA toolkit and C++ compiler. The denoiser compiles its pointwise kernels on the first run.
 
 ```bash
-python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e . -r src/f2lf/requirements.txt packaging psutil ninja wheel
-MAX_JOBS=4 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
-MAX_JOBS=4 python -m pip install --no-build-isolation \
-  'git+https://github.com/Dao-AILab/flash-attention.git@v2.7.4.post1#subdirectory=hopper'
+uv sync --locked --python 3.12 --extra hub --extra base-av-f2lf --group flash-build
+MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
+MAX_JOBS=4 uv pip install --no-build-isolation \
+  'git+https://github.com/Dao-AILab/flash-attention.git@6f8f0406eea522735d590c2d7b46139167b95b6e#subdirectory=hopper'
+source .venv/bin/activate
 ```
 
 ## Generate a transition

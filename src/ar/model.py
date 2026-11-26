@@ -79,4 +79,5 @@ def load_model(
         [deepcopy(model.out_layer) for _ in range(grid_points)]
     )
     model.load_state_dict(load_file(checkpoint), strict=True)
-    return model.eval().requires_grad_(False)
+    # reset_parameters recreates nonpersistent frequency buffers on the CPU.
+    return model.to(device).eval().requires_grad_(False)

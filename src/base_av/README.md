@@ -4,13 +4,12 @@ Base AV generates driving video from an initial frame and a text prompt. It also
 
 ## Environment
 
-The reference environment uses Python 3.12, PyTorch 2.7, CUDA 12.8 and FlashAttention 2. Install the matching CUDA build of PyTorch first. Building FlashAttention from source requires a compatible CUDA toolkit and compiler.
+The reference environment uses Python 3.12, PyTorch 2.7, CUDA 12.8 and FlashAttention 2. Install from the repository root using `uv`. Building FlashAttention requires the matching CUDA toolkit and a C++ compiler.
 
 ```sh
-python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e . -r src/base_av/requirements.txt
-python -m pip install packaging ninja wheel
-python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
+uv sync --locked --python 3.12 --extra hub --extra base-av-f2lf --group flash-build
+MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
+source .venv/bin/activate
 ```
 
 Run from the repository root. An H100 is used for the reference checks. Long clips require more GPU memory than short clips.

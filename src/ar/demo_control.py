@@ -25,6 +25,12 @@ class Layout:
         return cls(tuple(range(count)), vae, sr)
 
 
+def local_device_index(layout, rank, local_rank, vae_device):
+    if rank == layout.vae and vae_device is not None:
+        return vae_device
+    return local_rank
+
+
 @dataclass(frozen=True)
 class DriveWindow:
     poses: np.ndarray

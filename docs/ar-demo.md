@@ -21,6 +21,31 @@ For one GPU, start the same command with `python scripts/demo_ar.py` in place of
 
 The demo defaults to `ar/transformer.safetensors` for the eight solver evaluations. Add `--final-gan` to use `ar/final_transformer.safetensors` for evaluation eight while the base transformer maintains causal history.
 
+### Tensor parallelism on seven DiT GPUs
+
+The TP7 profile splits visual and camera attention heads and the feed-forward layers across seven GPUs. For eight H100s, run the command below with the eighth GPU dedicated to TurboVAE and JPEG delivery. The bundled image runs at 768×512.
+
+```bash
+OMP_NUM_THREADS=1 torchrun --standalone --nproc-per-node=8 scripts/demo_ar.py \
+  --weights weights/ar --image examples/reference.jpg \
+  --calibration examples/rollout.json --prompt-file examples/prompt.txt \
+  --dit-parallel tp --dit-graphs --compile-dit --reset-frames 128
+```
+
+For seven H100s total, keep eight processes and place the VAE process on the last visible GPU alongside the seventh DiT shard. GPU numbers are local to `CUDA_VISIBLE_DEVICES`.
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 OMP_NUM_THREADS=1 \
+  torchrun --standalone --nproc-per-node=8 scripts/demo_ar.py \
+  --weights weights/ar --image examples/reference.jpg \
+  --calibration examples/rollout.json --prompt-file examples/prompt.txt \
+  --dit-parallel tp --vae-device 6 --dit-graphs --compile-dit --reset-frames 128
+```
+
+The CUDA graphs use FlashAttention 3 and capture on first use of each cache layout. The initial chunks can pause while kernels compile and the graphs are captured. Leave `TORCH_COMPILE_DISABLE` and `TORCHDYNAMO_DISABLE` unset when using `--compile-dit`. To run eager TP, omit `--dit-graphs` and `--compile-dit`.
+
+TP changes the rounding order of projected activations through BF16 reductions across shards. Small differences from the dense model can accumulate into different rollouts when generated latents feed back into later windows.
+
 ## Two or three nodes
 
 Run one command per node in the same AR environment with matching model, startup and calibration files. Set `MASTER_ADDR` to a routable address of node 0. Set `NODE_RANK` to 0, 1 or 2 on the corresponding machine. The browser runs on the node containing the VAE rank.
@@ -70,5 +95,15 @@ Add `--benchmark-chunks 32 --warmup-chunks 4` to run the built-in straight-drive
 The eight-H100 profile above produced 512 JPEG-ready frames in 19.96 s, or 25.66 fps, across 32 measured chunks. Median DiT and latent transfer time was 618 ms per chunk. It uses the base AR transformer and leaves SR off.
 
 In a separate live run, the same profile streamed 320 generated frames plus the reference. A loopback MJPEG client received 256 steady-state frames at 24.00 fps. This measures HTTP frame delivery. Browser rendering and remote-network latency depend on the client and connection.
+
+For the compiled TP7 profiles at 768×512, use `--benchmark-chunks 24 --warmup-chunks 12` to warm the graph layouts before measuring 384 frames. The timings use the base AR transformer with SR off.
+
+| TP7 placement | JPEG-ready fps | Median DiT + transfer per 16 frames |
+| --- | ---: | ---: |
+| 8 H100s, dedicated TurboVAE GPU | 22.92 | 686 ms |
+| 7 H100s, shared TurboVAE GPU | 18.31 | 855 ms |
+| 7 H100s, shared TurboVAE GPU with CUDA MPS | 20.71 | 756 ms |
+
+In a separate run, the shared-GPU profile delivered 19.33 fps after warm-up to a local MJPEG client using live steering and the bundled caption. The native-resolution profiles fall short of sustained 24 fps. The MPS test ran the same seven-GPU command with an MPS daemon for the selected GPUs. [NVIDIA MPS setup](https://docs.nvidia.com/deploy/mps/latest/common-tasks.html)
 
 The demo precomputes the linear integration coefficients of each fixed PiFlow segment. This changes the floating-point operation order. The offline AR CLI retains the reference integration.

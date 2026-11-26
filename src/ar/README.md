@@ -4,23 +4,21 @@ Generate an autoregressive driving video from a starting image, a caption, and a
 
 ## Install
 
-The reference environment uses Python 3.12.9, PyTorch 2.7.0, CUDA 12.8, and an NVIDIA H100. Build FlashAttention with the matching CUDA toolkit and a C++ compiler. Use a dedicated environment for AR's dependencies.
+The reference environment uses Python 3.12.9, PyTorch 2.7.0, CUDA 12.8, and an NVIDIA H100. Install from the repository root using `uv`. Build FlashAttention with the matching CUDA toolkit and a C++ compiler.
 
 ```bash
-python3.12 -m venv .venv
+uv sync --locked --python 3.12 --extra hub --extra ucpe-ar --group flash-build
+MAX_JOBS=4 uv pip install --no-build-isolation flash-attn==2.7.4.post1
+MAX_JOBS=4 uv pip install --no-build-isolation \
+  'git+https://github.com/Dao-AILab/flash-attention.git@6f8f0406eea522735d590c2d7b46139167b95b6e#subdirectory=hopper'
 source .venv/bin/activate
-python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e . -r src/ar/requirements.txt packaging psutil ninja wheel
-MAX_JOBS=4 python -m pip install flash-attn==2.7.4.post1 --no-build-isolation
-MAX_JOBS=4 python -m pip install --no-build-isolation \
-  'git+https://github.com/Dao-AILab/flash-attention.git@v2.7.4.post1#subdirectory=hopper'
 ```
 
 Qwen caption encoding uses FlashAttention 2. Install the Hopper extension to use the default `--backend flash3` for the video transformer. [FlashAttention build instructions](https://github.com/Dao-AILab/flash-attention#flashattention-3-beta-release).
 
 ## Drive with the keyboard
 
-The browser demo uses this AR bundle with keyboard-generated camera poses. The launch guide covers one to three nodes and optional video super-resolution. [Keyboard demo and timings](../../docs/ar-demo.md)
+The browser demo uses this AR bundle with keyboard-generated camera poses. The launch guide covers one to three nodes, TP7 on seven or eight GPUs, and optional video super-resolution. [Keyboard demo and timings](../../docs/ar-demo.md)
 
 ## Run a trajectory
 

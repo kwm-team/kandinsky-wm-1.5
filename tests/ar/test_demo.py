@@ -6,7 +6,7 @@ import torch
 
 import ar.parallel as parallel
 from ar.demo import parse_args
-from ar.demo_control import Drive, Layout, read_rgb, resize_intrinsics, write_rgb
+from ar.demo_control import Drive, Layout, local_device_index, read_rgb, resize_intrinsics, write_rgb
 from ar.model import SolverSettings
 from ar.parallel import local_caption_routing
 from ar.runtime import active_camera_levels
@@ -79,6 +79,16 @@ def test_roles_allow_one_gpu_and_split_across_three_nodes():
         Layout.resolve(8, dit_ranks=7, vae_rank=6)
     with pytest.raises(ValueError, match="rank"):
         Layout.resolve(8, sr_rank=8)
+
+
+def test_vae_process_can_share_a_local_card_with_a_dit_rank():
+    layout = Layout.resolve(8)
+    assert local_device_index(layout, 7, 7, None) == 7
+    assert local_device_index(layout, 7, 7, 0) == 0
+    assert local_device_index(layout, 1, 1, 0) == 1
+    args = parse_args(["--weights", "ar", "--image", "frame.jpg", "--prompt", "Drive",
+                       "--calibration", "drive.json", "--dit-parallel", "tp", "--vae-device", "0"])
+    assert (args.dit_parallel, args.vae_device) == ("tp", 0)
 
 
 def test_drive_stationary_and_right_turn_preserve_opencv_camera_pose():
