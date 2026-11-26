@@ -24,7 +24,7 @@ The denoiser uses FlashAttention 3 when the extension is available. The Hugging 
 ## Run
 
 ```sh
-python -m ucpe --weights-dir weights/ucpe \
+python scripts/infer_ucpe.py --weights-dir weights/ucpe \
   --image examples/reference.jpg --prompt-file examples/prompt.txt \
   --trajectory examples/left.json --deterministic --output outputs/ucpe-left.mp4
 ```

@@ -28,7 +28,7 @@ assert sum(row["video_id"].startswith("av_accident_") for row in rows) == 8
 output.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 PY
 
-torchrun --standalone --nproc-per-node=8 -m base_av --mode i2v \
+torchrun --standalone --nproc-per-node=8 scripts/infer_base_av.py --mode i2v \
   --model-dir weights/base-av --input "$RUN/av.json" \
   --image-dir "$DATASET/condition_image" --output-dir "$RUN/videos" \
   --seed 42 --output-frames 120 --visual-size 512 \

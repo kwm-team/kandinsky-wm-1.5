@@ -78,7 +78,7 @@ kwm-av inspect weights/base-av --model base-av --verify
 Generate from the example frame. Use the same seed and prompt when comparing two implementations.
 
 ```bash
-python -m base_av --mode i2v --model-dir weights/base-av \
+python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
   --image examples/reference.jpg --prompt "$(cat examples/prompt.txt)" \
   --seed 42 --output outputs/base-av.mp4
 ```
@@ -92,7 +92,7 @@ Base AV can also assign different prompts to different portions of a clip. [Temp
 Start from one image and compare the four example camera paths. Each file specifies camera-to-world matrices and pixel intrinsics independently of the image and prompt. The merged UCPE weights are loaded as one inference checkpoint.
 
 ```bash
-python -m ucpe --weights-dir weights/ucpe --image examples/reference.jpg \
+python scripts/infer_ucpe.py --weights-dir weights/ucpe --image examples/reference.jpg \
   --prompt-file examples/prompt.txt --trajectory examples/straight.json \
   --deterministic --seed 42 --output outputs/ucpe-straight.mp4
 ```
@@ -104,7 +104,7 @@ Repeat with `examples/left.json`, `examples/right.json` or `examples/stationary.
 Use `examples/rollout.json` to replay multiple chunks, including a history reset. The runtime advances the latent history with each generated chunk. Render the full example with the Turbo decoder.
 
 ```bash
-TORCH_COMPILE_DISABLE=1 python -m ar --weights weights/ar \
+TORCH_COMPILE_DISABLE=1 python scripts/infer_ar.py --weights weights/ar \
   --image examples/reference.jpg --prompt-file examples/prompt.txt \
   --trajectory examples/rollout.json --deterministic --seed 42 \
   --output outputs/ar.mp4
@@ -117,7 +117,7 @@ The AR guide covers direct prompt encoding, precomputed text features, the decod
 Generate a five-second transition between two reference images with calibrated camera poses. Use `--offset-m 3.5` and a new output path to generate a right arc between the same anchors.
 
 ```bash
-python -m f2lf --weights weights/f2lf \
+python scripts/infer_f2lf.py --weights weights/f2lf \
   --a examples/f2lf/first.png --b examples/f2lf/last.png \
   --camera examples/f2lf/camera.json \
   --prompt-file examples/f2lf/prompt.txt --scene-file examples/f2lf/scene.txt \
@@ -134,6 +134,7 @@ python -m f2lf --weights weights/f2lf \
 | `src/ucpe/` | Camera-conditioned inference and checkpoint export |
 | `src/ar/` | Causal generation, solver, history and chunk decoding |
 | `src/f2lf/` | Two-reference generation, metric camera geometry and RF sampling |
+| `scripts/` | Inference launchers for all four models |
 | `examples/` | Reference frame, prompt and standalone metric camera paths |
 | `src/kwm_av/` | Model-agnostic weight downloads and integrity checks |
 | `tests/`, `tools/` | Release checks and decoded-video comparison |

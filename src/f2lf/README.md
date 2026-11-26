@@ -17,7 +17,7 @@ MAX_JOBS=4 python -m pip install --no-build-isolation \
 ## Generate a transition
 
 ```bash
-python -m f2lf --weights weights/f2lf \
+python scripts/infer_f2lf.py --weights weights/f2lf \
   --a examples/f2lf/first.png --b examples/f2lf/last.png \
   --camera examples/f2lf/camera.json \
   --prompt-file examples/f2lf/prompt.txt --scene-file examples/f2lf/scene.txt \

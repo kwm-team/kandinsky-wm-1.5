@@ -36,7 +36,7 @@ base-av/
 ## Start from an image
 
 ```sh
-python -m base_av --mode i2v --model-dir weights/base-av \
+python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
   --image first-frame.png \
   --prompt 'A dashcam approaches a green light and follows the road through the intersection.' \
   --seed 42 --output drive.mp4
@@ -49,7 +49,7 @@ For a five-second I2V clip at 24 FPS, supply a standalone JSON file with a `scen
 `hard` assigns one caption to each segment and is the default for `--prompt-segments`. `smooth` blends adjacent captions across segment boundaries. Both accept 120 or 121 output frames. In both modes, visual attention spans the whole clip to carry motion and scene content across segments. [Example prompt segments](../../examples/prompt_segments.json)
 
 ```sh
-python -m base_av --mode i2v --model-dir weights/base-av \
+python scripts/infer_base_av.py --mode i2v --model-dir weights/base-av \
   --image examples/reference.jpg --prompt-segments examples/prompt_segments.json \
   --temporal-text smooth --seed 42 --output drive-temporal.mp4
 ```
@@ -59,7 +59,7 @@ For a temporal batch, pass `--temporal-text hard` or `--temporal-text smooth` wi
 ## Continue a video
 
 ```sh
-python -m base_av --mode v2v --model-dir weights/base-av \
+python scripts/infer_base_av.py --mode v2v --model-dir weights/base-av \
   --video observed.mp4 --prefix-frames 9 \
   --prompt 'The vehicle leaves the intersection and continues along the same lane.' \
   --seed 42 --output continuation.mp4
@@ -83,7 +83,7 @@ Pass a JSON array or compatible CSV manifest as `--input` and choose an `--outpu
 
 A Physical AI Bench CSV with `filename` and `prompt` columns is also supported. If an image path is omitted, images are looked up under `condition_image/` by video ID. A suffix of the form `__42` on the filename supplies a per-row seed. Otherwise the default is 1137. `--seed` overrides the seed for all rows.
 
-Use `--dry-run` to list resolved inputs and outputs, and `--start` and `--limit` to select a batch slice. A completed output at the requested path is reused unless `--overwrite` is set. For a multi-GPU batch, replace `python -m base_av` with `torchrun --standalone --nproc-per-node 2 -m base_av`.
+Use `--dry-run` to list resolved inputs and outputs, and `--start` and `--limit` to select a batch slice. A completed output at the requested path is reused unless `--overwrite` is set. For a multi-GPU batch, launch the script with `torchrun --standalone --nproc-per-node=2 scripts/infer_base_av.py` and pass the same arguments.
 
 ## Code layout
 

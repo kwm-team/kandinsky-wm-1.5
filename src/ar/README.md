@@ -23,7 +23,7 @@ Qwen caption encoding uses FlashAttention 2. Install the Hopper extension to use
 From the repository root, point the runner at the AR weight directory. The example uses the bundled text encoder and TurboVAE for video decoding.
 
 ```bash
-TORCH_COMPILE_DISABLE=1 python -m ar \
+TORCH_COMPILE_DISABLE=1 python scripts/infer_ar.py \
   --weights weights/ar \
   --image examples/reference.jpg \
   --prompt-file examples/prompt.txt \
@@ -35,7 +35,7 @@ TORCH_COMPILE_DISABLE=1 python -m ar \
 
 The default attention backend is FlashAttention 3 on Hopper. Use `--backend flash2` or `--backend sdpa` on supported hardware if that extension is unavailable. Use `--decoder hunyuan` to decode with the base VAE. The starting image is encoded independently at one frame with Hunyuan. The output contains generated frames and starts at trajectory frame 1.
 
-The reference comparison used eager execution (`TORCH_COMPILE_DISABLE=1`) and deterministic cuDNN kernels for the VAE (`--deterministic`). The launcher also supports distributed token sharding. Replace `python -m ar` with `torchrun --standalone --nproc-per-node=2 -m ar` to run across two local GPUs.
+The reference comparison used eager execution (`TORCH_COMPILE_DISABLE=1`) and deterministic cuDNN kernels for the VAE (`--deterministic`). For distributed token sharding across two local GPUs, launch the same script with `torchrun --standalone --nproc-per-node=2 scripts/infer_ar.py` and pass the arguments above.
 
 The optional `--final-gan` selects the companion transformer on the last solver evaluation. This requires `final_transformer.safetensors`. The base transformer still provides the previous solver evaluations and commits all causal history.
 

@@ -17,13 +17,13 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install torch==2.7.0 --index-url https://download.pytorch.org/whl/cpu
       - run: python -m pip install . numpy scipy av safetensors pytest ruff==0.9.10
-      - run: ruff check --select E9,F63,F7,F82 src tests examples tools
-      - run: python -m compileall -q src examples tools
+      - run: ruff check --select E9,F63,F7,F82 src scripts tests examples tools
+      - run: python -m compileall -q src scripts examples tools
       - run: python -m pytest -q --import-mode=importlib tests
       - run: kwm-av --help
       - run: |
           for model in base_av ucpe ar f2lf; do
-            python -m "$model" --help
+            python "scripts/infer_$model.py" --help
           done
       - run: python examples/make_trajectories.py
       - run: git diff --exit-code
