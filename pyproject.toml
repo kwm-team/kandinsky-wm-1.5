@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kandinsky-wm-av"
+version = "0.1.0"
+description = "Native inference for Kandinsky WM 1.5 autonomous-driving models"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+hub = ["huggingface-hub>=0.27"]
+
+[project.scripts]
+kwm-av = "kwm_av.cli:main"
+
+[tool.setuptools]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "licenses/*.txt"]
+
+[tool.setuptools.packages.find]
+include = ["kwm_av*", "base_av*", "ucpe*", "piflow*"]
+exclude = ["*.tests", "*.tests.*"]
+namespaces = false

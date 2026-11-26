@@ -1,0 +1,1 @@
+"""Packed Qwen text encoder."""

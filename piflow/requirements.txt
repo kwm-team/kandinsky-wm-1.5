@@ -1,0 +1,9 @@
+accelerate==1.4.0
+av==16.1.0
+diffusers==0.32.2
+numpy==1.26.4
+omegaconf==2.3.0
+Pillow==11.1.0
+safetensors==0.5.3
+scipy==1.15.2
+transformers==4.49.0
