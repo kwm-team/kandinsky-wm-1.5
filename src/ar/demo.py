@@ -11,7 +11,7 @@ import statistics
 import subprocess
 import time
 
-from .demo_control import Drive, Layout, local_device_index, read_rgb, resize_intrinsics, write_rgb
+from .demo_control import Drive, Layout, center_crop, local_device_index, read_rgb, resize_intrinsics, write_rgb
 
 
 def parse_args(argv=None):
@@ -19,7 +19,9 @@ def parse_args(argv=None):
     parser.add_argument("--weights", type=Path, required=True)
     parser.add_argument("--image", type=Path, required=True)
     parser.add_argument("--calibration", type=Path, required=True, help="Trajectory JSON supplying frame zero and camera intrinsics")
-    parser.add_argument("--size", nargs=2, type=int, metavar=("WIDTH", "HEIGHT"), help="Resize the startup image and calibration for faster generation")
+    spatial = parser.add_mutually_exclusive_group()
+    spatial.add_argument("--size", nargs=2, type=int, metavar=("WIDTH", "HEIGHT"), help="Resize the startup image and calibration")
+    spatial.add_argument("--crop", nargs=2, type=int, metavar=("WIDTH", "HEIGHT"), help="Center-crop the startup image and shift its camera intrinsics")
     parser.add_argument("--reset-frames", type=int, help="Override the AR history reset interval in output frames")
     prompt = parser.add_mutually_exclusive_group(required=True)
     prompt.add_argument("--prompt")
@@ -62,8 +64,9 @@ def parse_args(argv=None):
         parser.error("A benchmark needs at least two measured chunks and nonnegative warmup")
     if args.frames is not None and (args.frames < 4 or args.frames % 4 or args.benchmark_chunks is not None):
         parser.error("--frames must be a positive multiple of four in live mode")
-    if args.size is not None and (min(args.size) < 16 or any(size % 16 for size in args.size)):
-        parser.error("--size dimensions must be positive multiples of 16")
+    for flag, size in (("--size", args.size), ("--crop", args.crop)):
+        if size is not None and (min(size) < 16 or any(dimension % 16 for dimension in size)):
+            parser.error(f"{flag} dimensions must be positive multiples of 16")
     if args.reset_frames is not None and (args.reset_frames < 4 or args.reset_frames % 4):
         parser.error("--reset-frames must be a positive multiple of four")
     return args
@@ -154,7 +157,7 @@ def prepare_inputs(args, image, layout, rank, device, distributed):
         codec = VideoCodec(
             args.weights / "vae", device, turbo_weights=args.weights / "turbo_decoder.pt"
         )
-        startup.copy_(codec.encode_startup(image, opt_tiling=args.size is None))
+        startup.copy_(codec.encode_startup(image, opt_tiling=args.size is None and args.crop is None))
     if distributed:
         for value in (startup, count, tokens, pooled):
             dist.broadcast(value, src=layout.vae)
@@ -392,6 +395,9 @@ def main(argv=None):
             image_size=size,
         )
         image = image.resize(size, Image.Resampling.LANCZOS)
+    elif args.crop is not None:
+        image, intrinsics = center_crop(image, trajectory.intrinsics, args.crop)
+        trajectory = replace(trajectory, intrinsics=intrinsics, image_size=image.size)
     if min(image.size) < 16 or any(size % 16 for size in image.size):
         raise ValueError("Image dimensions must be multiples of 16")
 

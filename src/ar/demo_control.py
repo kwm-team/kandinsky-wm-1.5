@@ -90,6 +90,15 @@ def resize_intrinsics(intrinsics, source_size, target_size):
     return pixel_resize @ intrinsics
 
 
+def center_crop(image, intrinsics, target_size):
+    width, height = target_size
+    if width > image.width or height > image.height:
+        raise ValueError("Crop dimensions cannot exceed the source image")
+    left, top = (image.width - width) // 2, (image.height - height) // 2
+    pixel_crop = np.array(((1, 0, -left), (0, 1, -top), (0, 0, 1)), dtype=intrinsics.dtype)
+    return image.crop((left, top, left + width, top + height)), pixel_crop @ intrinsics
+
+
 _RGB_HEADER = struct.Struct("!III")
 
 

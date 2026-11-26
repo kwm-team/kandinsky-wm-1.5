@@ -3,10 +3,11 @@ import io
 import numpy as np
 import pytest
 import torch
+from PIL import Image
 
 import ar.parallel as parallel
 from ar.demo import parse_args
-from ar.demo_control import Drive, Layout, local_device_index, read_rgb, resize_intrinsics, write_rgb
+from ar.demo_control import Drive, Layout, center_crop, local_device_index, read_rgb, resize_intrinsics, write_rgb
 from ar.model import SolverSettings
 from ar.parallel import local_caption_routing
 from ar.runtime import active_camera_levels
@@ -140,6 +141,25 @@ def test_intrinsics_follow_pixel_centers_when_downsampling():
     calibration = np.array([[[768, 0, 383.5], [0, 512, 255.5], [0, 0, 1]]], dtype=np.float32)
     resized = resize_intrinsics(calibration, (768, 512), (576, 384))
     np.testing.assert_array_equal(resized[0], [[576, 0, 287.5], [0, 384, 191.5], [0, 0, 1]])
+
+
+def test_demo_crops_to_16_by_9_without_rescaling_pixels_or_focal_length():
+    pixels = np.arange(512 * 768, dtype=np.int32).reshape(512, 768)
+    intrinsics = np.array([[[768, 0, 380], [0, 768, 250], [0, 0, 1]]], dtype=np.float32)
+    cropped, adjusted = center_crop(Image.fromarray(pixels), intrinsics, (768, 432))
+    np.testing.assert_array_equal(cropped, pixels[40:472])
+    np.testing.assert_array_equal(adjusted[0], [[768, 0, 380], [0, 768, 210], [0, 0, 1]])
+    assert intrinsics[0, 1, 2] == 250
+    with pytest.raises(ValueError, match="source image"):
+        center_crop(cropped, adjusted, (768, 512))
+
+
+def test_demo_crop_can_be_selected_without_resizing():
+    common = ["--weights", "ar", "--image", "frame.jpg", "--prompt", "Drive", "--calibration", "drive.json"]
+    args = parse_args([*common, "--crop", "768", "432"])
+    assert args.crop == [768, 432] and args.size is None
+    with pytest.raises(SystemExit):
+        parse_args([*common, "--crop", "768", "432", "--size", "768", "432"])
 
 
 def test_linear_rollout_matches_all_eight_reference_solver_segments():
