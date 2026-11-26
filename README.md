@@ -1,6 +1,6 @@
 # Kandinsky WM 1.5 · Autonomous Driving
 
-Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV generates or continues a clip from visual context and text. UCPE lets you specify the observing camera's path. PiFlow generates successive chunks while retaining the scene's history.
+Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajectories. Base AV adapts the pretrained video backbone of Kandinsky 6.0 Video Lite to autonomous driving. UCPE lets you specify the observing camera's path. PiFlow generates successive chunks while retaining the scene's history. [Kandinsky 6.0 Video technical report](https://arxiv.org/abs/2610.05608)
 
 ![Samples from Base AV with temporal prompts, UCPE with a left turn, and a PiFlow rollout](examples/generation_preview.jpg)
 
