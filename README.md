@@ -4,7 +4,7 @@
 
 # Kandinsky WM 1.5 · Autonomous Driving
 
-[Model weights](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV) · [Hugging Face collection](https://huggingface.co/collections/kandinskylab/kandinsky-wm-15-6b0420ff37178b56f3ae1f14) · [Kandinsky WM 1.0](https://github.com/kandinskylab/kandinsky-wm) · [Habr article on WM 1.0](https://habr.com/ru/companies/sberbank/articles/1054966/)
+[Model weights](https://huggingface.co/kandinskylab/Kandinsky-WM-1.5-AV) · [Hugging Face collection (team access)](https://huggingface.co/collections/kandinskylab/kandinsky-wm-15-6b0420ff37178b56f3ae1f14) · [Kandinsky WM 1.0](https://github.com/kandinskylab/kandinsky-wm) · [Habr article on WM 1.0](https://habr.com/ru/companies/sberbank/articles/1054966/)
 
 </div>
 
@@ -23,7 +23,7 @@ Kandinsky WM 1.5 generates road scenes from images, prompts and camera trajector
 
 ### Base AV
 
-Select a WebP preview to play the generated MP4. These showcase clips use super-resolution. Each clip includes its original prompt.
+Select a WebP preview to open the generated MP4 file. These showcase clips use super-resolution. Each clip includes its original prompt.
 
 | Intersection collision | Driving in rain at night |
 | --- | --- |
@@ -37,7 +37,7 @@ Select a WebP preview to play the generated MP4. These showcase clips use super-
 
 ### UCPE camera control
 
-Four continuations share a reference frame, prompt and seed. Select a preview to play the clip. [Shared reference frame](examples/reference.jpg) · [Shared prompt](examples/prompt.txt)
+Four continuations share a reference frame, prompt and seed. [Shared reference frame](examples/reference.jpg) · [Shared prompt](examples/prompt.txt)
 
 | Left turn | Right turn |
 | --- | --- |
