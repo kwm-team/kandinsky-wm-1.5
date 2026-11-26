@@ -19,7 +19,7 @@ Qwen caption encoding uses FlashAttention 2. Install the Hopper extension to use
 
 ## Drive with the keyboard
 
-The browser demo uses this AR bundle with keyboard-generated camera poses. The one-node TP7 profile streams a 768×432 crop at 24 fps after warm-up on eight H100s, including a dedicated TurboVAE GPU. The guide includes two- and three-node launches with video super-resolution. [Keyboard demo and timings](../../docs/ar-demo.md)
+The browser demo uses this AR bundle with keyboard-generated camera poses. The one-node TP7 profile streams a 768×432 crop at 24 fps after warm-up on eight H100s, including a dedicated TurboVAE GPU. [Keyboard demo and timings](../../docs/ar-demo.md)
 
 ## Run a trajectory
 

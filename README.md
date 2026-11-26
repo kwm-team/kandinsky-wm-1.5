@@ -163,7 +163,7 @@ TORCH_COMPILE_DISABLE=1 python scripts/infer_ar.py --weights weights/ar \
 
 The AR guide covers direct prompt encoding, precomputed text features, the decoder and the optional final-step model. [AR quickstart](src/ar/README.md)
 
-For live driving, start the keyboard demo with the same AR bundle. The guide covers launch commands for one, two and three nodes, optional super-resolution and measured throughput. [Keyboard demo](docs/ar-demo.md)
+For live driving, start the keyboard demo with the same AR bundle. The guide covers the eight-H100 TP7 launch and measured 16:9 throughput. [Keyboard demo](docs/ar-demo.md)
 
 ## F2LF
 
