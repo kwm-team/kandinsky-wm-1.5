@@ -71,11 +71,15 @@ Four continuations share a reference frame, prompt and seed. [Shared reference f
 
 ### F2LF endpoint control
 
-Both clips share the same reference images, captions and endpoint poses. The camera takes a straight path in the first clip and passes 3.5 m to the right of the midpoint in the second. [First frame](examples/f2lf/first.png) · [Last frame](examples/f2lf/last.png) · [Camera geometry](examples/f2lf/camera.json) · [Prompt](examples/f2lf/prompt.txt) · [Scene caption](examples/f2lf/scene.txt)
+Four camera paths share the same endpoints, captions and seed. The controls move the midpoint while keeping both ends of the path fixed. [Inputs and reproduction command](examples/f2lf/directions/README.md)
 
-| Straight path | Right arc |
+| Straight path | 3.5 m left arc |
 | --- | --- |
-| [![F2LF straight path](examples/f2lf/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/f2lf/straight.mp4) | [![F2LF right arc](examples/f2lf/right.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/bf803ac13e18eddf5211862535cd40ee9b884734/kandinsky-wm-1.5/av/f2lf/right.mp4) |
+| [![F2LF straight path](examples/f2lf/directions/straight.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/straight.mp4) | [![F2LF 3.5 metre left arc](examples/f2lf/directions/left-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/left-3.5m.mp4) |
+
+| 3.5 m right arc | 5 m right arc |
+| --- | --- |
+| [![F2LF 3.5 metre right arc](examples/f2lf/directions/right-3.5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-3.5m.mp4) | [![F2LF 5 metre right arc](examples/f2lf/directions/right-5m.webp)](https://huggingface.co/datasets/sashakunitsyn/static_videos/resolve/f2ed40c04f7ebf56779bddf00d2063bd7c522f09/kandinsky-wm-1.5/av/f2lf/directions/right-5m.mp4) |
 
 ## PAI-Bench-G results
 
